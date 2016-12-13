@@ -63,6 +63,7 @@ FSM mainFsm = FSM(Boot);
 struct Preset {
   String name;
   byte configuration;
+  bool enabled;
 };
 
 struct AppState {
@@ -76,7 +77,10 @@ struct AppState {
   bool run;
   bool failedToStart;
   Preset presets[MAX_PRESETS];
+  Preset enabledPresets[MAX_PRESETS];
   int currentPreset;
+  int presetCount;
+  int enabledPresetCount;
 };
 
 AppState state;
@@ -84,6 +88,10 @@ AppState state;
 TimedAction everySecondAction       = TimedAction(1 * SECOND, secondElapsed);
 
 void setup() {
+  // Da salvare nel file di configurazione:
+  // - fwVersion
+  // - configVersion
+  // - presetCount
   state.failedToStart = false;
   state.fwVersion = "0.0.0";
   state.configVersion = "0.0.0";
@@ -91,6 +99,8 @@ void setup() {
   state.config_file_found = false;
   state.config_file_loaded = false;
   state.currentPreset = 0;
+  state.presetCount = 0;
+  state.enabledPresetCount = 0;
 }
 
 void boot() {
@@ -256,6 +266,8 @@ void configure_web_routes() {
   });
 
   // PUT /presets.html
+  // - All'update di un preset occorre ricalcolare
+  //   la lista con i preset abilitati
   server.on("/presets.html", HTTP_PUT, [](){
   });
 
@@ -275,8 +287,20 @@ void enable_ap() {
   mainFsm.transitionTo(InitComplete);
 }
 
+void filterPresets() {
+  state.enabledPresetCount = 0;
+  Preset p;
+  for(int i=0; i<state.presetCount; i++) {
+    p = state.presets[i];
+    if (p.enabled) {
+      state.enabledPresets[state.enabledPresetCount] = p;
+      state.enabledPresetCount++;
+    }
+  }
+}
+
 void performPreset() {
-  Preset preset = state.presets[state.currentPreset];
+  Preset preset = state.enabledPresets[state.currentPreset];
   printer.println("[performPreset]")
          .println("Sending preset Nr. " + String(state.currentPreset))
          .println(preset.name + ": " + String(preset.configuration,16));
@@ -285,7 +309,7 @@ void performPreset() {
 void handleNextClick(Button &btn) {
   printer.println("[nextPresetClick]: Current is " + String(state.currentPreset));
   state.currentPreset++;
-  if (state.currentPreset >= MAX_PRESETS) state.currentPreset = 0;
+  if (state.currentPreset >= state.enabledPresetCount) state.currentPreset = 0;
   performPreset();
 }
 
@@ -298,7 +322,7 @@ void handleRewindClick(Button &btn) {
 void handlePrevClick(Button &btn) {
   printer.println("[prevPresetClick]: Current is " + String(state.currentPreset));
   state.currentPreset--;
-  if (state.currentPreset < 0) state.currentPreset = MAX_PRESETS - 1;
+  if (state.currentPreset < 0) state.currentPreset = state.enabledPresetCount - 1;
   performPreset();
 }
 
