@@ -1,0 +1,95 @@
+#include <EEPROM.h>
+#include <Preset.h>
+
+PRE_READ set;
+int nrel = 6; //numero relè presenti nel loop
+int r[6]={2,3,4,5,6,7}; //digital pin dei relé
+int d; //divisore per la conversione in binario... da mettere in libreria
+int id=0; // indice dei preset
+int np=12;  // numero preset... serve per lo scorrimento del menu
+int i=0; //variabile per il contatore
+int v[6]; //vettore da scrivere per le operazioni
+boolean DEBUG = false;
+
+Preset p1(0,"Clean + Delay   ",32); 
+Preset p2(1,"Clean Ch.+Delay ",40);
+Preset p3(2,"Clean Ch+Ph+Del ",56); 
+Preset p4(3,"OverDrive       ",4);
+Preset p5(4,"OD + Delay      ",36); 
+Preset p6(5,"OD + Ch. + Delay",44);
+Preset p7(6,"OD+Ch.+Ph.+Delay",60); 
+Preset p8(7,"Distortion      ",2);
+Preset p9(8,"Dist. + Delay   ",34); 
+Preset p10(9,"Dist.+Ch.+Delay ",42);
+Preset p11(10,"Dist+Ch+Ph+Delay",58); 
+Preset p12(11,"Big Muff        ",1);
+Preset p13(12,"Muff + Delay    ",33);
+Preset p14(13,"Muff + Phaser   ",17);
+Preset p15(14,"Muff+Ph+Delay   ",49);
+Preset p[15]={p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15};
+
+void setup(void)
+{
+  Serial.begin(9600);
+  for(i=0;i<nrel;i++){
+  pinMode(r[i],OUTPUT);
+  digitalWrite(r[i],LOW);
+  }
+  delay(1000);
+  //scrittura dei preset in memoria
+  if(DEBUG == true){
+  p1.write();
+  p2.write();
+  p3.write();
+  p4.write();
+  }
+  
+}
+
+void loop(void){
+  
+  //incremento id
+  if(analogRead(0) > 1000){
+    id=(id+1)%np;
+    Serial.println(id+1);
+    Serial.println(p[id].get_name());
+    delay(100);
+    attivaPreset();       
+  }
+  //decremento id
+  if(analogRead(1) > 1000){
+    id=(id-1)%np;
+    if(id==-1) id=np-1;
+    Serial.println(id+1);
+    Serial.println(p[id].get_name());
+    delay(100);
+    attivaPreset();
+  }
+  //bypass
+  if(analogRead(2) > 1000){
+    for(i=0;i<nrel;i++){
+    digitalWrite(r[i],LOW);
+    }
+    Serial.println("Bypass");
+  }
+  delay(100);
+  
+}
+
+void attivaPreset(){
+  set=p[id].read();
+  d=set.setting;
+  for(i=0;i<4;i++){
+    v[3-i]=d%2;
+    d=d/2;
+  }
+  for(i=0;i<nrel;i++) Serial.print(v[i]);
+  Serial.println();
+  for(i=0;i<nrel;i++){
+    if(v[i]==1){
+      digitalWrite(r[i],HIGH);
+    }
+    else digitalWrite(r[i],LOW);
+  }  
+}
+
