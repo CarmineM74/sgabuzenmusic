@@ -26,13 +26,16 @@
 // D0 - Used if DeepSleep is required
 // D1 - SCL GPIO5
 // D2 - SDA GPIO4
-// D3 - I2C
-// D4 - Onboard LED (WLED)
+// D3 - I2C (Expander, ...)
+// D4 - Onboard LED
 LED hbLed = LED(D4);
 
 // D5 - NEXT PRESET BUTTON
+Button nextBtn = Button(D5, BUTTON_PULLUP_INTERNAL);
 // D6 - REWIND TO 0 BUTTON
+Button rewindBtn = Button(D6, BUTTON_PULLUP_INTERNAL);
 // D7 - PREVIOUS PRESET BUTTON
+Button prevBtn = Button(D7, BUTTON_PULLUP_INTERNAL);
 // D8 - CS
 // A0 -
 
@@ -73,6 +76,7 @@ struct AppState {
   bool run;
   bool failedToStart;
   Preset presets[MAX_PRESETS];
+  int currentPreset;
 };
 
 AppState state;
@@ -86,6 +90,7 @@ void setup() {
   state.initComplete = false;
   state.config_file_found = false;
   state.config_file_loaded = false;
+  state.currentPreset = 0;
 }
 
 void boot() {
@@ -204,35 +209,60 @@ bool save_config() {
   }
 }
 
+String getContentType(String filename) {
+	if (server.hasArg("download")) return "application/octet-stream";
+	else if (filename.endsWith(".htm")) return "text/html";
+	else if (filename.endsWith(".html")) return "text/html";
+	else if (filename.endsWith(".css")) return "text/css";
+	else if (filename.endsWith(".js")) return "application/javascript";
+	else if (filename.endsWith(".json")) return "application/json";
+	else if (filename.endsWith(".png")) return "image/png";
+	else if (filename.endsWith(".gif")) return "image/gif";
+	else if (filename.endsWith(".jpg")) return "image/jpeg";
+	else if (filename.endsWith(".ico")) return "image/x-icon";
+	else if (filename.endsWith(".xml")) return "text/xml";
+	else if (filename.endsWith(".pdf")) return "application/x-pdf";
+	else if (filename.endsWith(".zip")) return "application/x-zip";
+	else if (filename.endsWith(".gz")) return "application/x-gzip";
+	return "text/plain";
+}
+
+bool handleFileRead(String path) {
+     if (path.endsWith("/")) path += "index.html";
+    String contentType = getContentType(path);
+    String pathWithGz = path + ".gz";
+    if (SPIFFS.exists(pathWithGz)) path = pathWithGz;
+    if (SPIFFS.exists(path)) {
+        File file = SPIFFS.open(path, "r");
+        size_t sent = server.streamFile(file, contentType);
+        size_t contentLength = file.size();
+        file.close();
+        return true;
+    }
+    return false;
+}
+
 void configure_web_routes() {
   // GET /
-  server.on("/",[](){
-    if (server.method() == HTTP_GET) {
-      printer.println("[HTTP] GET / REQUEST RECEIVED!");
-      //getContentType
-    } else {
-      if (server.args() != 0) {
-        String message = "";
-        for ( uint8_t i = 0; i < server.args(); i++ ) {
-        		message = " " + server.argName ( i ) + ": " + server.arg ( i );
-            printer.println(message);
-        }
-      }
-      // state.ssid = server.arg("ssid");
-      // state.wifi_password = server.arg("password");
-      server.send(200,"text/html","<b>Saving credentials!</b>");
-      save_config();
-    }
+  server.on("/",HTTP_GET,[](){
+    if(!handleFileRead("/index.html"))
+      server.send(404, "text/plain", "404. NOT FOUND");
   });
 
-  // PUT /presets/name?value=data
-  server.on("/presets", [](){
-    if (server.method() == HTTP_PATCH) {
+  // GET /presets.html
+  server.on("/presets.html", HTTP_GET, [](){
+    if(!handleFileRead("/presets.html"))
+      server.send(404, "text/plain", "404. NOT FOUND");
+  });
 
-    } else {
-      printer.println("[HTTP] INVALID VERB ON /presets/:name?value=data");
-      server.send(401,"text/html", "<p><b> :( </b></p>");
-    }
+  // PUT /presets.html
+  server.on("/presets.html", HTTP_PUT, [](){
+  });
+
+  // 404
+  server.onNotFound( []() {
+    if(!handleFileRead("/404.html"))
+      server.send(404, "text/plain", "404. NOT FOUND");
   });
 }
 
@@ -245,11 +275,46 @@ void enable_ap() {
   mainFsm.transitionTo(InitComplete);
 }
 
+void performPreset() {
+  Preset preset = state.presets[state.currentPreset];
+  printer.println("[performPreset]")
+         .println("Sending preset Nr. " + String(state.currentPreset))
+         .println(preset.name + ": " + String(preset.configuration,16));
+}
+
+void handleNextClick(Button &btn) {
+  printer.println("[nextPresetClick]: Current is " + String(state.currentPreset));
+  state.currentPreset++;
+  if (state.currentPreset >= MAX_PRESETS) state.currentPreset = 0;
+  performPreset();
+}
+
+void handleRewindClick(Button &btn) {
+  printer.println("[rewindPresetClick]");
+  state.currentPreset = 0;
+  performPreset();
+}
+
+void handlePrevClick(Button &btn) {
+  printer.println("[prevPresetClick]: Current is " + String(state.currentPreset));
+  state.currentPreset--;
+  if (state.currentPreset < 0) state.currentPreset = MAX_PRESETS - 1;
+  performPreset();
+}
+
+void configureButtons() {
+  nextBtn.clickHandler(handleNextClick);
+  rewindBtn.clickHandler(handleRewindClick);
+  prevBtn.clickHandler(handlePrevClick);
+}
+
 void init_complete() {
   if (!state.initComplete) {
     state.initComplete = true;
     printer.println("[init_complete]")
-           .println("SYSTEM READY");
+           .println("Configuring buttons ...");
+    configureButtons();
+    printer.println("SYSTEM READY");
   }
 }
 
@@ -259,8 +324,15 @@ void secondElapsed() {
   else hbLed.off();
 }
 
+void handleButtons() {
+  nextBtn.scan();
+  rewindBtn.scan();
+  prevBtn.scan();
+}
+
 void loop() {
   everySecondAction.check();
   server.handleClient();
   mainFsm.update();
+  handleButtons();
 }
