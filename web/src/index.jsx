@@ -1,5 +1,7 @@
 import React from 'react';
 import {render} from 'react-dom';
+import {connect} from 'react-redux';
+import {Router, Route, IndexRoute, browserHistory} from 'react-router';
 
 // Components
 
@@ -65,7 +67,7 @@ class PresetsTable extends React.Component {
 class PresetList extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { presets: PRESETS };
+    this.state = { presets: [] };
   }
 
   componentDidMount() {
@@ -91,8 +93,7 @@ class PresetList extends React.Component {
   }
 }
 
-
-class App extends React.Component {
+class Main extends React.Component {
   render () {
     return (
       <div>
@@ -100,7 +101,7 @@ class App extends React.Component {
         <div className="container-fluid">
           <div className="row">
             <div className="col-sm-12 col-md-12 main">
-              <PresetList presets={this.props.presets} />
+              {React.cloneElement(this.props.children, this.props)}
             </div>
           </div>
         </div>
@@ -109,11 +110,12 @@ class App extends React.Component {
   }
 }
 
-var PRESETS = [
-  {name: "first", value: "58", enabled: true},
-  {name: "second", value: "88", enabled: true},
-  {name: "third", value: "33", enabled: false},
-  {name: "fourth", value: "12", enabled: true},
-]
+const router = (
+  <Router history={browserHistory}>
+    <Route path="/" component={Main}>
+      <IndexRoute component={PresetList}></IndexRoute>
+    </Route>
+  </Router>
+);
 
-render(<App presets={PRESETS} />, document.getElementById('app'));
+render(router, document.getElementById('app'));
