@@ -5,7 +5,7 @@ import {render} from 'react-dom';
 
 class NavBar extends React.Component {
   render() {
-    return 
+    return (
       <nav className="navbar navbar-inverse navbar-fixed-top">
         <div className="container-fluid">
           <div className="navbar-header">
@@ -24,79 +24,74 @@ class NavBar extends React.Component {
             </ul>
           </div>
         </div>
-      </nav>;
+      </nav>
+    );
   }
 }
 
 class PresetRow extends React.Component {
   render() {
-    return
-      <div></div>;
+    return (
+      <tr>
+        <td>{this.props.preset.enabled}</td>
+        <td>{this.props.preset.name}</td>
+        <td>{this.props.preset.value}</td>
+        <td>+ / - / ^</td>
+      </tr>
+    );
   }
 }
 
 class PresetList extends React.Component {
   render() {
-    return 
-      <h2 className="sub-header">System Presets</h2>
-      <div className="table-responsive">
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Value</th>
-              <th>Options</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Lorem</td>
-              <td>sit</td>
-              <td>+ / - / ^</td>
-            </tr>
-            <tr>
-              <td>amet</td>
-              <td>elit</td>
-              <td>+ / - / ^</td>
-            </tr>
-            <tr>
-              <td>Integer</td>
-              <td>Praesent</td>
-              <td>+ / - / ^</td>
-            </tr>
-            <tr>
-              <td>libero</td>
-              <td>ante</td>
-              <td>+ / - / ^</td>
-            </tr>
-            <tr>
-              <td>dapibus</td>
-              <td>nisi</td>
-              <td>+ / - / ^</td>
-            </tr>
-            <tr>
-              <td>Nulla</td>
-              <td>at</td>
-              <td>+ / - / ^</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>;
+    var rows = [];
+    this.props.presets.forEach(function(preset) {
+      rows.push(<PresetRow preset={preset} key={preset.name} />);
+    });
+    return (
+      <div>
+        <h2 className="sub-header">System Presets</h2>
+        <div className="table-responsive">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Enabled</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Options</th>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 }
+
 
 class App extends React.Component {
   render () {
-    return 
-      <NavBar />
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            <h1 class="page-header">Dashboard</h1>
+    return (
+      <div>
+        <NavBar />
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-sm-12 col-md-12 main">
+              <PresetList presets={this.props.presets} />
+            </div>
+          </div>
         </div>
       </div>
-    </div>;
+    );
   }
 }
 
-render(<App/>, document.getElementById('app'));
+var PRESETS = [
+  {name: "first", value: "58", enabled: true},
+  {name: "second", value: "88", enabled: true},
+  {name: "third", value: "33", enabled: false},
+  {name: "fourth", value: "12", enabled: true},
+]
+
+render(<App presets={PRESETS} />, document.getElementById('app'));
