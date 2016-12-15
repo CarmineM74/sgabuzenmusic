@@ -4,3 +4,4 @@
 .piolibdeps
 .DS_Store
 web/node_modules
+data
