@@ -1,7 +1,5 @@
 import React from 'react';
 import {render} from 'react-dom';
-var PresetStore = require('./stores/PresetStore.js');
-var PresetActions = require('./actions/PresetActions.js');
 
 // Components
 
@@ -50,7 +48,7 @@ class PresetsTable extends React.Component {
     this.props.presets.forEach(function(preset) {
       rows.push(<PresetRow preset={preset} key={preset.name} />);
     });
-    return     
+    return ( 
       <table className="table table-striped">
         <thead>
           <tr>
@@ -61,26 +59,21 @@ class PresetsTable extends React.Component {
           </tr>
         </thead>
         <tbody>{rows}</tbody>
-      </table>;
+      </table>
+    );
   }
 }
 
 class PresetList extends React.Component {
   constructor(props) {
     super(props)
-    this.state = PresetStore.getState();
+    this.state = { presets: PRESETS };
   }
 
   componentDidMount() {
-    PresetStore.listen(this.onChange());
   }
 
   componentWillUnmount() {
-    PresetStore.unlisten(this.onChange());
-  }
-
-  onChange(state) {
-    this.setState(state);
   }
 
   render() {
