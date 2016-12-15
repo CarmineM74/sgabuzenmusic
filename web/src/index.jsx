@@ -29,18 +29,16 @@ class NavBar extends React.Component {
   }
 }
 
-class PresetRow extends React.Component {
-  render() {
+const PresetRow = ({preset}) => {
     return (
       <tr>
-        <td>{this.props.preset.enabled}</td>
-        <td>{this.props.preset.name}</td>
-        <td>{this.props.preset.value}</td>
+        <td>{preset.enabled}</td>
+        <td>{preset.name}</td>
+        <td>{preset.value}</td>
         <td>+ / - / ^</td>
       </tr>
     );
-  }
-}
+} 
 
 class PresetsTable extends React.Component {
   render() {
