@@ -1,5 +1,7 @@
 import React from 'react';
 import {render} from 'react-dom';
+var PresetStore = require('./stores/PresetStore.js');
+var PresetActions = require('./actions/PresetActions.js');
 
 // Components
 
@@ -42,27 +44,56 @@ class PresetRow extends React.Component {
   }
 }
 
-class PresetList extends React.Component {
+class PresetsTable extends React.Component {
   render() {
     var rows = [];
     this.props.presets.forEach(function(preset) {
       rows.push(<PresetRow preset={preset} key={preset.name} />);
     });
+    return     
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            <th>Enabled</th>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Options</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>;
+  }
+}
+
+class PresetList extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = PresetStore.getState();
+  }
+
+  componentDidMount() {
+    PresetStore.listen(this.onChange());
+  }
+
+  componentWillUnmount() {
+    PresetStore.unlisten(this.onChange());
+  }
+
+  onChange(state) {
+    this.setState(state);
+  }
+
+  render() {
+    if (!this.state.presets.length) {
+      return <div className="spinner">Loading ...</div>;
+    } else {
+      return <PresetsTable presets={this.state.presets} />;
+    }
     return (
       <div>
         <h2 className="sub-header">System Presets</h2>
         <div className="table-responsive">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Enabled</th>
-                <th>Name</th>
-                <th>Value</th>
-                <th>Options</th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </table>
+          {data}
         </div>
       </div>
     );
