@@ -1,16 +1,14 @@
 import { createStore, combineReducers } from 'redux';
 
-const INITIAL_STATE = {
-  presets: [
+const DUMMY_PRESETS = [
     {name: "first", value: "58", enabled: true},
     {name: "second", value: "88", enabled: true},
     {name: "third", value: "33", enabled: false},
     {name: "fourth", value: "12", enabled: true},
-  ]
-};
+];
 
 // Individual Reducers
-const presets = (state = INITIAL_STATE, action) => {
+const presets = (state = DUMMY_PRESETS, action) => {
   console.log("Reducing presets: ", state);
   return state;
 }
