@@ -6,7 +6,7 @@ let PresetList = (props) => {
   if (!props.presets.length) {
     return <div className="spinner">Loading ...</div>;
   } else {
-    return <PresetsTable presets={props.presets} />;
+    return <PresetsTable />;
   }
   return (
     <div>
