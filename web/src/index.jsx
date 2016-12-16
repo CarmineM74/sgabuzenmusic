@@ -1,7 +1,8 @@
 import React from 'react';
 import {render} from 'react-dom';
-import {connect} from 'react-redux';
+import {Provider, connect} from 'react-redux';
 import {Router, Route, IndexRoute, browserHistory} from 'react-router';
+import store from './store';
 
 // Components
 
@@ -64,34 +65,33 @@ class PresetsTable extends React.Component {
   }
 }
 
-class PresetList extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { presets: [] };
+let PresetList = (props) => {
+  if (!props.presets.presets.length) {
+    return <div className="spinner">Loading ...</div>;
+  } else {
+    return <PresetsTable presets={props.presets.presets} />;
   }
-
-  componentDidMount() {
-  }
-
-  componentWillUnmount() {
-  }
-
-  render() {
-    if (!this.state.presets.length) {
-      return <div className="spinner">Loading ...</div>;
-    } else {
-      return <PresetsTable presets={this.state.presets} />;
-    }
-    return (
-      <div>
-        <h2 className="sub-header">System Presets</h2>
-        <div className="table-responsive">
-          {data}
-        </div>
+  return (
+    <div>
+      <h2 className="sub-header">System Presets</h2>
+      <div className="table-responsive">
+        {data}
       </div>
-    );
-  }
+    </div>
+  );
 }
+
+PresetList = connect(
+  // mapStateToProps
+  (state) => {
+    return {
+      presets: state.presets
+    }
+  },
+  // mapDispatchToProps
+  // when null just pass dispatch
+  null 
+)(PresetList);
 
 class Main extends React.Component {
   render () {
@@ -111,11 +111,13 @@ class Main extends React.Component {
 }
 
 const router = (
-  <Router history={browserHistory}>
-    <Route path="/" component={Main}>
-      <IndexRoute component={PresetList}></IndexRoute>
-    </Route>
-  </Router>
+  <Provider store={ store }>
+    <Router history={browserHistory}>
+      <Route path="/" component={Main}>
+        <IndexRoute component={PresetList}></IndexRoute>
+      </Route>
+    </Router>
+  </Provider>
 );
 
 render(router, document.getElementById('app'));

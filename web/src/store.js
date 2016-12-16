@@ -11,14 +11,15 @@ const INITIAL_STATE = {
 
 // Individual Reducers
 const presets = (state = INITIAL_STATE, action) => {
-  return state
+  console.log("Reducing presets: ", state);
+  return state;
 }
 
 // Combined Reducers
-const presetApp = combineReducers({
+const presetsApp = combineReducers({
   presets
-})
+});
 
 const store = createStore(presetsApp);
 
-module.export = store;
+export default store;
