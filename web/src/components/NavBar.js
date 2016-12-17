@@ -12,7 +12,12 @@ class NavBar extends React.Component {
               <span className="icon-bar"></span>
               <span className="icon-bar"></span>
             </button>
-            <a className="navbar-brand" href="#">SGABUZEN</a>
+            <a className="navbar-brand sgabuzen-music-logo" href="#">
+              &nbsp;
+              &nbsp;
+              &nbsp;
+            </a>
+            <span className="navbar-brand">SGABUZEN</span>
           </div>
           <div id="navbar" className="navbar-collapse collapse">
             <ul className="nav navbar-nav navbar-right">

@@ -25,6 +25,12 @@ body {
   border: 0;
 }
 
+.sgabuzen-music-logo {
+  background-image: url('../img/sgabuzen_music_logo.jpg');
+  background-repeat: no-repeat;
+  background-size: 90%;
+}
+
 /*
  * Sidebar
  */
