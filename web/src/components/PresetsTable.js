@@ -9,7 +9,11 @@ const PresetRow = ({preset}) => {
         <td>{preset.enabled}</td>
         <td>{preset.name}</td>
         <td>{preset.value}</td>
-        <td>+ / - / ^</td>
+        <td>
+          <button type="button" className="glyphicon glyphicon-remove btn btn-default btn-xs" ></button>
+          &nbsp;
+          <button type="button" className="glyphicon glyphicon-pencil btn btn-default btn-xs" ></button>
+        </td>
       </tr>
     );
 } 
