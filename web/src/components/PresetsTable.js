@@ -1,4 +1,5 @@
 import React from 'react';
+import {Checkbox} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as actionCreators from '../actionCreators';
@@ -6,7 +7,7 @@ import * as actionCreators from '../actionCreators';
 const PresetRow = ({preset}) => {
     return (
       <tr>
-        <td>{preset.enabled}</td>
+        <td><Checkbox checked={preset.enabled} readOnly></Checkbox></td>
         <td>{preset.name}</td>
         <td>{preset.value}</td>
         <td>

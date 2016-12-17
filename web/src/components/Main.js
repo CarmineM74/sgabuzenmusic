@@ -1,11 +1,11 @@
 import React from 'react';
-import NavBar from './NavBar';
+import TopNavBar from './TopNavBar';
 
 class Main extends React.Component {
   render () {
     return (
       <div>
-        <NavBar />
+        <TopNavBar />
         <div className="container-fluid">
           <div className="row">
             <div className="col-sm-12 col-md-12 main">
