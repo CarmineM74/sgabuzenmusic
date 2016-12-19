@@ -21,7 +21,6 @@ const PresetRow = ({preset}) => {
 
 let PresetsTable = (props) => {
   var rows = [];
-  console.log(props);
   if (props.loadingPresets) {
     return (<div className="sgabuzen-music-loading"></div>);
   } else {
