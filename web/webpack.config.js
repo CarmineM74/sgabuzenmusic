@@ -11,6 +11,13 @@ var config = {
     filename: 'bundle.js'
   },
   plugins: [
+    new webpack.DefinePlugin({
+        'process.env': {
+              // This has effect on the react lib size
+              'NODE_ENV': JSON.stringify('production'),
+            },
+      }),
+    new webpack.optimize.UglifyJsPlugin({minimize: true}),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin()
   ],
