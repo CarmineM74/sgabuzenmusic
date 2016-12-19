@@ -4,6 +4,7 @@
 #include <Button.h>
 
 void boot();
+void fsDirToSerial();
 void load_config();
 bool save_config();
 void remove_config_file();

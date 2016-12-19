@@ -112,8 +112,27 @@ void boot() {
     printer.println("Failed to mount file system");
     mainFsm.transitionTo(FailedToStart);
   } else {
+    fsDirToSerial();
     mainFsm.transitionTo(LoadConfig);
   }
+}
+
+void fsDirToSerial() {
+  Dir dir = SPIFFS.openDir("/");
+  String output = "[";
+  while(dir.next()){
+    File entry = dir.openFile("r");
+    if (output != "[") output += ',';
+    bool isDir = false;
+    output += "{\"type\":\"";
+    output += (isDir)?"dir":"file";
+    output += "\",\"name\":\"";
+    output += String(entry.name()).substring(1);
+    output += "\"}";
+    entry.close();
+  }
+  output += "]";
+  printer.println(output);
 }
 
 void failed_to_start() {
@@ -238,18 +257,19 @@ String getContentType(String filename) {
 }
 
 bool handleFileRead(String path) {
-     if (path.endsWith("/")) path += "index.html";
-    String contentType = getContentType(path);
-    String pathWithGz = path + ".gz";
-    if (SPIFFS.exists(pathWithGz)) path = pathWithGz;
-    if (SPIFFS.exists(path)) {
-        File file = SPIFFS.open(path, "r");
-        size_t sent = server.streamFile(file, contentType);
-        size_t contentLength = file.size();
-        file.close();
-        return true;
-    }
-    return false;
+  printer.println("[handleFileRead]: " + path);
+  if (path.endsWith("/")) path += "index.html";
+  String contentType = getContentType(path);
+  String pathWithGz = path + ".gz";
+  if (SPIFFS.exists(pathWithGz)) path = pathWithGz;
+  if (SPIFFS.exists(path)) {
+      File file = SPIFFS.open(path, "r");
+      size_t sent = server.streamFile(file, contentType);
+      size_t contentLength = file.size();
+      file.close();
+      return true;
+  }
+  return false;
 }
 
 void configure_web_routes() {
@@ -271,10 +291,9 @@ void configure_web_routes() {
   server.on("/presets.html", HTTP_PUT, [](){
   });
 
-  // 404
   server.onNotFound( []() {
-    if(!handleFileRead("/404.html"))
-      server.send(404, "text/plain", "404. NOT FOUND");
+    if (!handleFileRead(server.uri()))
+      server.send(404, "text/plain", "FileNotFound");
   });
 }
 

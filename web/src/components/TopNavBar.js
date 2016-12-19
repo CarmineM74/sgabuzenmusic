@@ -12,7 +12,7 @@ class TopNavBar extends React.Component {
 						<a href="#" className="sgabuzen-music-logo">&nbsp;&nbsp;&nbsp;</a>
 					</Navbar.Brand>
 					<Navbar.Brand>
-						<a href="#">SGABUZEN</a>
+						<a href="#">Guitar Router</a>
 					</Navbar.Brand>
 					<Navbar.Toggle />
 				</Navbar.Header>
