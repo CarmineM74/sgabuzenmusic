@@ -38,23 +38,23 @@ var config = {
       },
       { 
         test: /\.jpg$/, 
-        loader: "file-loader" 
+        loader: 'url?limit=60000'
       },
       {
         test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, 
-        loader: 'url?limit=10000&mimetype=application/font-woff'
+        loader: 'url?limit=60000&mimetype=application/font-woff'
       },
       {
         test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, 
-        loader: 'url?limit=10000&mimetype=application/octet-stream'
+        loader: 'url?limit=60000&mimetype=application/octet-stream'
       },
       {
         test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, 
-        loader: 'file'
+        loader: 'url?limit=60000&mimetype=application/vnd.ms-fontobject'
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, 
-        loader: 'url?limit=10000&mimetype=image/svg+xml'
+        loader: 'url?limit=110000&mimetype=image/svg+xml'
       }
     ]
   }
