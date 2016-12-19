@@ -26,7 +26,13 @@ var config = {
       {
         test: /\.jsx?/,
         include: APP_DIR,
-        loader: 'babel'
+        loader: 'babel',
+        // npm i babel-plugin-transform-runtime -S
+        // This plugin is required in order to avoid the infamous
+        // regeneratorRuntime error
+        query: {
+          plugins: [ "transform-runtime" ]
+        }
       },
       {
         test: /\.css$/,
@@ -38,6 +44,10 @@ var config = {
       },
       { 
         test: /\.jpg$/, 
+        loader: 'url?limit=60000'
+      },
+      { 
+        test: /\.gif/, 
         loader: 'url?limit=60000'
       },
       {

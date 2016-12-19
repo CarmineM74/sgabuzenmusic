@@ -21,35 +21,53 @@ const PresetRow = ({preset}) => {
 
 let PresetsTable = (props) => {
   var rows = [];
-  props.presets.forEach(function(preset) {
-    rows.push(<PresetRow preset={preset} key={preset.name} />);
-  });
+  console.log(props);
+  if (props.loadingPresets) {
+    return (<div className="sgabuzen-music-loading"></div>);
+  } else {
+    if (props.presets.length) {
+      props.presets.forEach(function(preset) {
+        rows.push(<PresetRow preset={preset} key={preset.name} />);
+      });
+    } else {
+      props.loadPresets();
+    }
+  }
   return ( 
-    <table className="table table-striped">
-      <thead>
-        <tr>
-          <th>Enabled</th>
-          <th>Name</th>
-          <th>Value</th>
-          <th>Options</th>
-        </tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
+    <div>
+      <h2 className="sub-header">System Presets</h2>
+      <div className="table-responsive">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Enabled</th>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Options</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+        </div>
+    </div>
   );
 };
 
+
+function mapStateToProps(state) {
+  return {
+    loadingPresets: state.loadingPresets,
+    presets: state.presets
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(actionCreators, dispatch);
+}
+
 PresetsTable = connect(
-  (state) => {
-    return {
-      presets: state.presets
-    }
-  },
-  // When the need will arise we should use
-  // bindActionCreators(actionCreators,dispatch)
-  // in order to allow for injection of actions
-  // creators in the components.
-  null
+  mapStateToProps,
+  mapDispatchToProps
 )(PresetsTable);
 
 export default PresetsTable;
