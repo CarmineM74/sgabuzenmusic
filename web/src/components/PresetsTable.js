@@ -25,8 +25,8 @@ const PresetRow = ({preset, onDelete, idx}) => {
 
 let PresetsTable = (props) => {
   var rows = [];
-  console.log(props);
-  if (props.loadingPresets) {
+  console.log("[PresetsTable]", props);
+  if (props.isLoadingPresets) {
     return (<div className="sgabuzen-music-loading"></div>);
   } else {
     if (props.presets.length) {
@@ -57,9 +57,11 @@ let PresetsTable = (props) => {
 
 
 function mapStateToProps(state) {
+  console.log("[mapStateToProps]", state);
   return {
-    loadingPresets: state.loadingPresets,
-    presets: state.presets
+    isLoadingPresets: state.isLoadingPresets,
+    presets: state.presets,
+    preset: state.preset
   }
 }
 

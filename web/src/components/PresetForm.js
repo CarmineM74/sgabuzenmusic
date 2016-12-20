@@ -9,8 +9,13 @@ import * as actionCreators from '../actionCreators';
 let PresetForm = (props) => {
   console.log("PresetForm", props);
   if (props.params.presetName) {
-    console.log("EDITING PRESET: ", props.params.presetName);
-    props.findPresetByName(props.params.presetName);
+    if ((!props.preset) || (props.preset.name != props.params.presetName)) {
+      console.log("[PresetForm] finding preset ", props.params.presetName);
+      const idx = props.presets.findIndex((preset) => preset.name === props.params.presetName);
+      console.log("Preset found at index ", idx);
+      const p = Object.assign({}, props.presets[idx], {});
+      props.selectPreset(p);
+    }
   }
   return (
     <Form model="preset" horizontal>
@@ -41,11 +46,11 @@ let PresetForm = (props) => {
       <FormGroup>
         <Col smOffset={2} sm={10}>
           <ControlLabel>
+            Enabled
             <Control.checkbox
               model="preset.enabled"
               component={Checkbox}
             />
-            Enabled
           </ControlLabel>
         </Col>
       </FormGroup>
@@ -64,7 +69,8 @@ let PresetForm = (props) => {
 
 function mapStateToProps(state) {
   return {
-    presets: state.presets
+    presets: state.presets,
+    preset: state.preset
   }
 }
 

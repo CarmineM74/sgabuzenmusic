@@ -13,6 +13,13 @@ export function deletePreset(presetName, idx) {
   }
 }
 
+export function selectPreset(preset) {
+  return {
+    type: "SELECT_PRESET",
+    preset
+  }
+}
+
 export function findPresetByName(presetName) {
   return {
     type: "FIND_PRESET_BY_NAME",

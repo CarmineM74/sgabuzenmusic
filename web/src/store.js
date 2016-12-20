@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware} from 'redux';
-import { combineForms } from 'react-redux-form';
+import { createForms } from 'react-redux-form';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from './sagas';
 
@@ -26,51 +26,49 @@ function updateItemInArray(array, itemId, updateItemCallback) {
     return updatedItems;
 }
 
-// Individual Reducers
-const loadingPresets = (state = false, action) => {
+const isLoadingPresets = (state = false, action) => {
   switch (action.type) {
-    case 'LOAD_PRESETS':
-      console.log("[STORE LOAD PRESETS]");
-      return true;  
+    case 'LOAD_PRESETS': return true;
     default:
-      console.log("[STORE LOAD PRESETS DEFAULT]");
       return false;
   }
 }
 
-const presets = (state = [], action) => {
+const EMPTY_PRESET_FORM = {
+  name: "Empty",
+  value: 0,
+  enabled: false
+}
+
+const preset = (state = EMPTY_PRESET, action) => {
+  console.log("[preset]", state, action);
   switch (action.type) {
-    case 'LOAD_PRESETS_SUCCEEDED':
-      console.log("[LOAD_PRESETS_SUCCEEDED]", action);
-      return action.presets;
-    case 'DELETE_PRESET':
-      console.log("[presets] Deleting preset ", state, action.presetName, action.idx);
-      return [
-        ...state.slice(0,action.idx),
-        ...state.slice(action.idx+1)
-      ];
+    case 'SELECT_PRESET':
+      return action.preset;
     default:
       return state;
   }
 }
 
-const EMPTY_PRESET = {
-  name: "",
-  value: 0,
-  enabled: false
-};
-
-
-const selectedPresetIdx = (state = -1, action) => {
-  return state;
-};
-
+const presets = (state = [], action) => {
+  switch (action.type) {
+    case 'LOAD_PRESETS_SUCCEEDED': 
+      return action.presets;
+    case 'DELETE_PRESET': 
+      const newPresets = [
+        ...state.slice(0,action.idx),
+        ...state.slice(action.idx+1)
+      ];
+      return newPresets;
+    default: return state;
+  }
+}
 
 // Combined Reducers
-const presetsApp = combineForms({
-  loadingPresets,
+const presetsApp = combineReducers({
+  isLoadingPresets,
   presets,
-  selectedPresetIdx
+  ...createForms({preset})
 });
 
 const sagaMiddleWare = createSagaMiddleware();

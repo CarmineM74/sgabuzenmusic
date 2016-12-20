@@ -19,7 +19,13 @@ function* deletePreset(action){
   yield put({type: "PRESET_DELETED", presetName: action.presetName});
 }
 
+function* findPresetByName(action) {
+  console.log("[SAGA FINDING PRESET]", action);
+  yield put({type: "PRESET_FOUND", preset: {found: true, name: "found", value: 255, enabled: true}});
+}
+
 export default function* rootSaga() {
   yield takeLatest("LOAD_PRESETS", loadPresets);
   yield takeEvery("DELETE_PRESET", deletePreset);
+  yield takeLatest("FIND_PRESET_BY_NAME", findPresetByName);
 };
