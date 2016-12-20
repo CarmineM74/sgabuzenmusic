@@ -14,9 +14,12 @@ function* loadPresets() {
   yield put({type: "LOAD_PRESETS_SUCCEEDED", presets: DUMMY_PRESETS});
 }
 
-function* mySaga() {
-  console.log("RUNNING MY SAGA ...");
-  yield takeEvery("LOAD_PRESETS", loadPresets);
+function* deletePreset(action){
+  console.log("[SAGA DELETING PRESET]", action);
+  yield put({type: "PRESET_DELETED", presetName: action.presetName});
 }
 
-export default mySaga;
+export default function* rootSaga() {
+  yield takeLatest("LOAD_PRESETS", loadPresets);
+  yield takeEvery("DELETE_PRESET", deletePreset);
+};

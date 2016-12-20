@@ -7,6 +7,7 @@ import './css/dashboard.css';
 import store from './store';
 import Main from './components/Main';
 import PresetsTable from './components/PresetsTable';
+import PresetForm from './components/PresetForm';
 import System from './components/System';
 
 const router = (
@@ -14,8 +15,9 @@ const router = (
     <Router history={browserHistory}>
       <Route path="/" component={Main}>
         <IndexRoute component={PresetsTable}></IndexRoute>
-        <Route path="/system" component={System}>
-        </Route>
+        <Route path="/system" component={System} />
+        <Route path="/new" component={PresetForm} />
+        <Route path="/edit/:presetName" component={PresetForm} />
       </Route>
     </Router>
   </Provider>
