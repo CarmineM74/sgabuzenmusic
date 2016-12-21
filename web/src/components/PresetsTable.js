@@ -1,5 +1,5 @@
 import React from 'react';
-import {Checkbox} from 'react-bootstrap';
+import {Checkbox, Col} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
@@ -37,7 +37,14 @@ let PresetsTable = (props) => {
   }
   return ( 
     <div>
-      <h2 className="sub-header">System Presets</h2>
+      <Col className="col-xs-10">
+        <h3 className="sub-header">System Presets</h3>
+      </Col>
+      <Col className="col-xs-2 pull-right">
+        <LinkContainer to="/new">
+          <button type="button" className="glyphicon glyphicon-plus btn btn-default btn-xs" />
+        </LinkContainer>
+      </Col>
       <div className="table-responsive">
         <table className="table table-striped">
           <thead>
