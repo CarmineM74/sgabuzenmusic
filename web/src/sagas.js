@@ -14,6 +14,18 @@ function* loadPresets() {
   yield put({type: "LOAD_PRESETS_SUCCEEDED", presets: DUMMY_PRESETS});
 }
 
+function* savePreset(action) {
+  console.log("[SAGA SAVING PRESET]", action);
+  yield delay(300);
+  yield put({type: "SAVE_PRESET_SUCCEEDED", preset: action.preset});
+}
+
+function* updatePreset(action) {
+  console.log("[SAGA UPDATING PRESET]", action);
+  yield delay(300);
+  yield put({type: "UPDATE_PRESET_SUCCEEDED", preset: action.preset});
+}
+
 function* deletePreset(action){
   console.log("[SAGA DELETING PRESET]", action);
   yield put({type: "PRESET_DELETED", presetName: action.presetName});
@@ -27,5 +39,7 @@ function* findPresetByName(action) {
 export default function* rootSaga() {
   yield takeLatest("LOAD_PRESETS", loadPresets);
   yield takeEvery("DELETE_PRESET", deletePreset);
+  yield takeLatest("SAVE_PRESET", savePreset);
+  yield takeLatest("UPDATE_PRESET", updatePreset);
   yield takeLatest("FIND_PRESET_BY_NAME", findPresetByName);
 };

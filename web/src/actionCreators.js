@@ -5,6 +5,20 @@ export function loadPresets() {
   }
 }
 
+export function savePreset(preset) {
+  return {
+    type: "SAVE_PRESET",
+    preset
+  }
+}
+
+export function updatePreset(preset) {
+  return {
+    type: "UPDATE_PRESET",
+    preset
+  }
+}
+
 export function deletePreset(presetName, idx) {
   return {
     type: "DELETE_PRESET",

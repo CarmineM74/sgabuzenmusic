@@ -1,6 +1,7 @@
 import React from 'react';
 import {FormGroup, FormControl, Col, ControlLabel, Checkbox, Button} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap';
+import {browserHistory} from 'react-router';
 import {Form, Control, actions} from 'react-redux-form';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
@@ -16,7 +17,24 @@ let PresetForm = (props) => {
       const p = Object.assign({}, props.presets[idx], {});
       props.selectPreset(p);
     }
+  } else {
+    props.dispatch(actions.reset('preset'));
   }
+
+  function handleSaveClick(e) {
+    e.preventDefault();
+    console.log("[PresetForm] handling save");
+    if (props.params.presetName) {
+      console.log("UPDATING");
+      props.updatePreset(props.preset);
+      
+    } else {
+      console.log("CREATING");
+      props.savePreset(props.preset);
+    }
+    browserHistory.push("/");
+  } 
+
   return (
     <Form model="preset" horizontal>
       <FormGroup controlId="presetName">
@@ -56,7 +74,7 @@ let PresetForm = (props) => {
       </FormGroup>
       <FormGroup>
         <Col smOffset={2} sm={10}>
-          <Button type="submit">Save</Button>
+          <Button type="submit" onClick={handleSaveClick}>Save</Button>
           &nbsp;
           <LinkContainer to="/">
             <Button className="btn-primary">Cancel</Button>
@@ -75,7 +93,10 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators(actionCreators, dispatch);
+  return {
+    dispatch,
+    ...bindActionCreators(actionCreators, dispatch)
+  }
 }
 
 PresetForm = connect(

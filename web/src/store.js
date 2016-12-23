@@ -40,7 +40,7 @@ const EMPTY_PRESET_FORM = {
   enabled: false
 }
 
-const preset = (state = EMPTY_PRESET, action) => {
+const preset = (state = EMPTY_PRESET_FORM, action) => {
   console.log("[preset]", state, action);
   switch (action.type) {
     case 'SELECT_PRESET':
@@ -54,6 +54,27 @@ const presets = (state = [], action) => {
   switch (action.type) {
     case 'LOAD_PRESETS_SUCCEEDED': 
       return action.presets;
+    case 'SAVE_PRESET_SUCCEEDED':
+      console.log("APPENDING NEWLY CREATED PRESET");
+      return [
+        ...state,
+        action.preset
+      ]
+    case 'UPDATE_PRESET_SUCCEEDED':
+      console.log("UPDATE PRESET", action);
+      const idx = state.findIndex((preset) => preset.name === action.preset.name);
+      console.log("Found element at ", idx);
+      console.log("ACTUAL STATE IS ", state);
+
+      const newState = [
+        ...state.slice(0,idx),
+        action.preset,
+        ...state.slice(idx+1)
+      ];
+
+      console.log("NEW STATE IS ", newState);
+
+      return newState;
     case 'DELETE_PRESET': 
       const newPresets = [
         ...state.slice(0,action.idx),
