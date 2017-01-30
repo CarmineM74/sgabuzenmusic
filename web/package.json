@@ -12,6 +12,7 @@
   "author": "Carmine Moleti",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.15.3",
     "babel-core": "^6.20.0",
     "babel-loader": "^6.2.9",
     "babel-plugin-transform-runtime": "^6.15.0",

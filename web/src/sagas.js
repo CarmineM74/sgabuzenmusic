@@ -1,5 +1,6 @@
 import { delay, takeEvery, takeLatest } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
+import axios from 'axios'
 
 const DUMMY_PRESETS = [
     {name: "first", value: "58", enabled: true},
@@ -10,8 +11,14 @@ const DUMMY_PRESETS = [
 
 function* loadPresets() {
   console.log("[SAGA LOADING PRESETS]");
-  yield delay(2000);
-  yield put({type: "LOAD_PRESETS_SUCCEEDED", presets: DUMMY_PRESETS});
+  var result = yield call(axios.get, 'http://192.168.4.1/presets.json');
+  if (result.error) {
+    console.log("[RESULT]", result);
+    yield put({type: "LOAD_PRESETS_SUCCEEDED", presets: []});
+  } else {
+    console.log("[DATA]", result.data.presets);
+    yield put({type: "LOAD_PRESETS_SUCCEEDED", presets: result.data.presets});
+  }
 }
 
 function* savePreset(action) {

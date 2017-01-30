@@ -19,6 +19,7 @@
 #define MINUTE                                          60 * SECOND
 #define JSON_BUFFER_SIZE                                1024
 #define MAX_PRESETS                                     32
+#define PRESET_NAME_MAX_LEN                             32
 #define AP_NAME                                         "SGABAP"
 #define AP_PASSWORD                                     "DEADBEEF"
 
@@ -61,6 +62,7 @@ State FailedToStart = State(failed_to_start);
 FSM mainFsm = FSM(Boot);
 
 struct Preset {
+  //char name[PRESET_NAME_MAX_LEN];
   String name;
   byte configuration;
   bool enabled;
@@ -272,6 +274,15 @@ bool handleFileRead(String path) {
   return false;
 }
 
+JsonObject& serializePreset(Preset ps) {
+  StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+  JsonObject& o = jsonBuffer.createObject();
+  o.set("name", ps.name);
+  o.set("enabled", ps.enabled);
+  o.set("configuration", ps.configuration);
+  return o;
+}
+
 void configure_web_routes() {
   // GET /
   server.on("/",HTTP_GET,[](){
@@ -280,20 +291,32 @@ void configure_web_routes() {
   });
 
   // GET /presets.html
-  server.on("/presets.html", HTTP_GET, [](){
-    if(!handleFileRead("/presets.html"))
-      server.send(404, "text/plain", "404. NOT FOUND");
-  });
-
-  // PUT /presets.html
-  // - All'update di un preset occorre ricalcolare
-  //   la lista con i preset abilitati
-  server.on("/presets.html", HTTP_PUT, [](){
+  server.on("/presets.json", HTTP_GET, [](){
+    StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+    JsonObject& root = jsonBuffer.createObject();
+    JsonArray &data = root.createNestedArray("presets");
+    state.presets[0].name = "Test preset";
+    state.presets[0].configuration = 255;
+    state.presets[0].enabled = true;
+    state.presetCount = 1;
+    printer.println("Serializing " + String(state.presetCount) + " presets");
+    for(int i=0; i<state.presetCount; i++) {
+      printer.println("Serializing preset: " + String(i));
+      data.add(serializePreset(state.presets[i]));
+    }
+    int buffer_size = root.measureLength()+1;
+    printer.println("Dimensione del buffer: " + String(buffer_size) + "...");
+    char *buffer = (char*)malloc(buffer_size*sizeof(char));
+    root.printTo(buffer, buffer_size);
+    root.printTo(Serial);
+    server.send(200, "application/json", buffer);
+    free(buffer);
+    buffer = 0;
   });
 
   server.onNotFound( []() {
     if (!handleFileRead(server.uri()))
-      server.send(404, "text/plain", "FileNotFound");
+      server.send(404, "text/plain", "404. NOT FOUND");
   });
 }
 
@@ -322,7 +345,7 @@ void performPreset() {
   Preset preset = state.enabledPresets[state.currentPreset];
   printer.println("[performPreset]")
          .println("Sending preset Nr. " + String(state.currentPreset))
-         .println(preset.name + ": " + String(preset.configuration,16));
+         .println(String(preset.name) + ": " + String(preset.configuration,16));
 }
 
 void handleNextClick(Button &btn) {

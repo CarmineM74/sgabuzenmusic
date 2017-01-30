@@ -66,6 +66,8 @@ const presets = (state = [], action) => {
       console.log("Found element at ", idx);
       console.log("ACTUAL STATE IS ", state);
 
+      // Is really newState a completely new object?
+      // ... operator produces a shallow copy
       const newState = [
         ...state.slice(0,idx),
         action.preset,
