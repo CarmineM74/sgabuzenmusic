@@ -1,0 +1,20 @@
+{
+  "name": "web",
+  "homepage": "https://github.com/CarmineM74/sgabuzenmusic",
+  "authors": [
+    "Carmine Moleti <carmine@moleti.it>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "app-layout": "PolymerElements/app-layout#^0.10.7"
+  }
+}

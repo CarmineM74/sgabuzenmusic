@@ -1,4 +1,3 @@
-require('./main.css');
 var logoPath = require('../static/sgabuzen_music_logo.jpg');
 var Elm = require('./Main.elm');
 
