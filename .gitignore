@@ -3,6 +3,8 @@
 .gcc-flags.json
 .piolibdeps
 .DS_Store
-web/node_modules
+node_modules
+bower_components
+elm-stuff
 data
 npm-debug.log
