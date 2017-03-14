@@ -1,6 +1,10 @@
-<link rel="import" href="/bower_components/font-roboto/roboto.html">
 
 <style is="custom-style" include="iron-flex iron-flex-alignment">
+  @font-face {
+    font-family: "Roboto";
+    src: url('./Roboto-Regular.ttf') format('truetype');
+  }
+
   /* The :root selector lets you set document-wide overrides for particular
    * properties.  This lets you do theming.
    */
@@ -11,6 +15,9 @@
     /* in that theme.
     /*
      */
+    --paper-font-common-base: {
+      font-family: "Roboto", sans-serif
+    }
     --default-primary-color: #373b50;
     --dark-primary-color: var(--default-primary-color);
     --dark-primary-color-darkened: #282b3b;

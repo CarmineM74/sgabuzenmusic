@@ -3,7 +3,8 @@ module App exposing (..)
 import Debug
 import Html exposing (Html, text, div, img, node)
 import Html.Attributes exposing (attribute, class, src)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, on)
+import Json.Decode as JD
 import Polymer.App as PA
 import Polymer.Attributes exposing (icon, label)
 import Polymer.Paper as Paper
@@ -22,9 +23,8 @@ init path =
 
 type Msg
     = NoOp
-    | FirstRowSelect
-    | SecondRowSelect
     | GenericSelect String
+    | SelectedItemChanged
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,18 +79,22 @@ header model =
         ]
 
 
+decodeSelectedItemChanged : JD.Decoder Msg
+decodeSelectedItemChanged =
+    JD.succeed SelectedItemChanged
+
+
 table : Html Msg
 table =
     div []
-        [ Paper.iconButton [ icon "favorite", onClick (GenericSelect "Hi") ] []
-        , node "vaadin-grid"
-            []
+        [ node "vaadin-grid"
+            [ on "selected-items-changed" decodeSelectedItemChanged
+            ]
             [ Html.table
                 []
                 [ Html.colgroup
                     []
                     [ Html.col [ attribute "flex" "1" ] []
-                    , Html.col [ attribute "flex" "1" ] []
                     , Html.col [ attribute "flex" "1" ] []
                     , Html.col [ attribute "flex" "1" ] []
                     , Html.col [ attribute "flex" "1" ] []
@@ -103,7 +107,6 @@ table =
                         , Html.th [] [ text "Nome" ]
                         , Html.th [] [ text "Valore" ]
                         , Html.th [] [ text "Enabled" ]
-                        , Html.th [] [ text "Azioni" ]
                         ]
                     ]
                 , Html.tbody
@@ -114,7 +117,6 @@ table =
                         , Html.td [] [ text "Carmine" ]
                         , Html.td [] [ text "74" ]
                         , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
-                        , Html.td [] [ Paper.iconButton [ attribute "icon" "icons:build", onClick FirstRowSelect ] [] ]
                         ]
                     , Html.tr
                         []
@@ -122,7 +124,6 @@ table =
                         , Html.td [] [ text "Francesco" ]
                         , Html.td [] [ text "77" ]
                         , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
-                        , Html.td [] [ Paper.iconButton [ attribute "icon" "icons:build", onClick SecondRowSelect ] [] ]
                         ]
                     ]
                 ]
