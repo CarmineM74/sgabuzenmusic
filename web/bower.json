@@ -16,9 +16,9 @@
   ],
   "dependencies": {
     "app-layout": "PolymerElements/app-layout#^0.10.7",
-    "font-roboto": "PolymerElements/font-roboto#^1.0.1",
     "iron-elements": "PolymerElements/iron-elements#^1.0.10",
     "vaadin-grid": "^1.2.1",
-    "paper-checkbox": "PolymerElements/paper-checkbox#^1.4.2"
+    "paper-checkbox": "PolymerElements/paper-checkbox#^1.4.2",
+    "paper-card": "PolymerElements/paper-card#^1.1.4"
   }
 }

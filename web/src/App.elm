@@ -40,14 +40,7 @@ view model =
         [ drawer
         , PA.headerLayout []
             [ header model
-            , div []
-                [ Paper.button
-                    [ attribute "raised" ""
-                    , class "secondary"
-                    ]
-                    [ text "Aggiungi preset" ]
-                , table
-                ]
+            , tableCard model
             ]
         ]
 
@@ -79,16 +72,36 @@ header model =
         ]
 
 
+tableCard : Model -> Html Msg
+tableCard model =
+    Paper.card
+        [ attribute "heading" "Presets"
+        , attribute "elevation" "3"
+        ]
+        [ div
+            [ class "card-content" ]
+            [ table model ]
+        , div
+            [ class "card-actions" ]
+            [ Paper.button [ class "primary" ] [ text "Aggiungi" ]
+            , Paper.button [ class "secondary" ] [ text "Aggiorna" ]
+            , Paper.button [ class "secondary", attribute "disabled" "" ] [ text "Modifica" ]
+            , Paper.button [ class "secondary", attribute "disabled" "" ] [ text "Elimina" ]
+            ]
+        ]
+
+
 decodeSelectedItemChanged : JD.Decoder Msg
 decodeSelectedItemChanged =
     JD.succeed SelectedItemChanged
 
 
-table : Html Msg
-table =
+table : Model -> Html Msg
+table model =
     div []
         [ node "vaadin-grid"
-            [ on "selected-items-changed" decodeSelectedItemChanged
+            [ attribute "visible-rows" "09"
+            , on "selected-items-changed" decodeSelectedItemChanged
             ]
             [ Html.table
                 []
@@ -111,24 +124,50 @@ table =
                     ]
                 , Html.tbody
                     []
-                    [ Html.tr
-                        []
-                        [ Html.td [] [ text "0" ]
-                        , Html.td [] [ text "Carmine" ]
-                        , Html.td [] [ text "74" ]
-                        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
-                        ]
-                    , Html.tr
-                        []
-                        [ Html.td [] [ text "1" ]
-                        , Html.td [] [ text "Francesco" ]
-                        , Html.td [] [ text "77" ]
-                        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
-                        ]
-                    ]
+                    (tableBody model)
                 ]
             ]
         ]
+
+
+tableBody : Model -> List (Html Msg)
+tableBody model =
+    [ Html.tr
+        []
+        [ Html.td [] [ text "0" ]
+        , Html.td [] [ text "Carmine" ]
+        , Html.td [] [ text "74" ]
+        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
+        ]
+    , Html.tr
+        []
+        [ Html.td [] [ text "1" ]
+        , Html.td [] [ text "Francesco" ]
+        , Html.td [] [ text "77" ]
+        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
+        ]
+    , Html.tr
+        []
+        [ Html.td [] [ text "2" ]
+        , Html.td [] [ text "Anna" ]
+        , Html.td [] [ text "80" ]
+        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
+        ]
+    , Html.tr
+        []
+        [ Html.td [] [ text "3" ]
+        , Html.td [] [ text "Enrico" ]
+        , Html.td [] [ text "09" ]
+        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
+        ]
+    , Html.tr
+        []
+        [ Html.td [] [ text "4" ]
+        , Html.td [] [ text "Assunta" ]
+        , Html.td [] [ text "17" ]
+        , Html.td [] [ node "paper-checkbox" [ attribute "checked" "" ] [] ]
+        ]
+    ]
 
 
 subscriptions : Model -> Sub Msg
