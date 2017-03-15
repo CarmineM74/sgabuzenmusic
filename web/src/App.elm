@@ -1,7 +1,7 @@
 module App exposing (..)
 
 import Debug
-import Html exposing (Html, text, div, h1, img, node, p)
+import Html exposing (Html, text, div, h1, i, img, node, p)
 import Html.Attributes exposing (attribute, class, src)
 import Html.Events exposing (onClick, on)
 import Json.Decode as JD
@@ -60,7 +60,12 @@ header model =
 
 body : Model -> Html Msg
 body model =
-    div [] [ p [] [ text "Something to see now." ] ]
+    div []
+        [ p []
+            [ text "Something to see now."
+            , i [ class "material-icons" ] [ text "face" ]
+            ]
+        ]
 
 
 subscriptions : Model -> Sub Msg
