@@ -22,7 +22,26 @@ type alias Model =
     { message : String
     , logo : String
     , mdl : Material.Model
+    , presets : List Preset
     }
+
+
+type alias Preset =
+    { id : Int
+    , nome : String
+    , valore : Int
+    , enabled : Bool
+    }
+
+
+defaultPresets : List Preset
+defaultPresets =
+    [ { id = 0, nome = "Carmine", valore = 74, enabled = True }
+    , { id = 1, nome = "Francesco", valore = 77, enabled = True }
+    , { id = 2, nome = "Anna", valore = 80, enabled = True }
+    , { id = 3, nome = "Enrico", valore = 9, enabled = True }
+    , { id = 4, nome = "Assunga", valore = 17, enabled = False }
+    ]
 
 
 init : String -> ( Model, Cmd Msg )
@@ -30,6 +49,7 @@ init path =
     ( { message = "Guitar router is loading ..."
       , logo = path
       , mdl = Material.model
+      , presets = defaultPresets
       }
     , Layout.sub0 Mdl
     )
@@ -78,6 +98,19 @@ body model =
         ]
 
 
+actionButton : Material.Model -> List Int -> List (Button.Property Msg) -> String -> Html Msg
+actionButton mdl btnIdx props iconName =
+    Button.render Mdl
+        btnIdx
+        mdl
+        ([ Button.ripple
+         , Button.icon
+         ]
+            ++ props
+        )
+        [ Icon.i iconName ]
+
+
 tableCard : Model -> Html Msg
 tableCard model =
     Card.view
@@ -91,49 +124,23 @@ tableCard model =
         , Card.text [] [ table model ]
         , Card.actions
             [ Card.border ]
-            [ Button.render Mdl
-                [ 0, 0 ]
-                model.mdl
-                [ Button.ripple
-                , Button.primary
-                , Button.icon
-                , Tooltip.attach Mdl [ 1, 0 ]
-                ]
-                [ Icon.i "update" ]
-            , Tooltip.render Mdl
-                [ 1, 0 ]
-                model.mdl
-                [ Tooltip.top ]
-                [ text "Aggiorna" ]
-            , Button.render Mdl
-                [ 0, 1 ]
-                model.mdl
-                [ Button.ripple
-                , Button.accent
-                , Button.icon
-                , Tooltip.attach Mdl [ 1, 1 ]
-                ]
-                [ Icon.i "add_circle" ]
-            , Tooltip.render Mdl
-                [ 1, 1 ]
-                model.mdl
-                [ Tooltip.top ]
-                [ text "Nuovo preset" ]
-            , Button.render Mdl
-                [ 0, 2 ]
-                model.mdl
-                [ Button.ripple
-                , Button.disabled
-                , Button.icon
-                , Tooltip.attach Mdl [ 1, 2 ]
-                ]
-                [ Icon.i "remove_circle" ]
-            , Tooltip.render Mdl
-                [ 1, 2 ]
-                model.mdl
-                [ Tooltip.top ]
-                [ text "Elimina preset" ]
+            [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Tooltip.attach Mdl [ 1, 0 ] ] "update"
+            , Tooltip.render Mdl [ 1, 0 ] model.mdl [ Tooltip.top ] [ text "Aggiorna" ]
+            , actionButton model.mdl [ 0, 1 ] [ Button.accent, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
+            , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
+            , actionButton model.mdl [ 0, 2 ] [ Button.disabled, Tooltip.attach Mdl [ 1, 2 ] ] "remove_circle"
+            , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
             ]
+        ]
+
+
+presetRow : Preset -> Html Msg
+presetRow preset =
+    Table.tr []
+        [ Table.td [] [ text (toString preset.id) ]
+        , Table.td [] [ text preset.nome ]
+        , Table.td [ Table.numeric ] [ text (toString preset.valore) ]
+        , Table.td [] [ text (toString preset.enabled) ]
         ]
 
 
@@ -150,37 +157,7 @@ table model =
                 ]
             ]
         , Table.tbody []
-            [ Table.tr []
-                [ Table.td [] [ text "0" ]
-                , Table.td [] [ text "Carmine" ]
-                , Table.td [ Table.numeric ] [ text "74" ]
-                , Table.td [] [ text "True" ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ text "1" ]
-                , Table.td [] [ text "Francesco" ]
-                , Table.td [ Table.numeric ] [ text "77" ]
-                , Table.td [] [ text "True" ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ text "2" ]
-                , Table.td [] [ text "Anna" ]
-                , Table.td [ Table.numeric ] [ text "80" ]
-                , Table.td [] [ text "True" ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ text "3" ]
-                , Table.td [] [ text "Enrico" ]
-                , Table.td [ Table.numeric ] [ text "09" ]
-                , Table.td [] [ text "True" ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ text "4" ]
-                , Table.td [] [ text "Assunta" ]
-                , Table.td [ Table.numeric ] [ text "17" ]
-                , Table.td [] [ text "False" ]
-                ]
-            ]
+            (List.map presetRow model.presets)
         , Table.tfoot []
             [ Table.tr []
                 [ Table.td [ Options.attribute <| attribute "colspan" "4" ] [ text "pagination goes here" ]
