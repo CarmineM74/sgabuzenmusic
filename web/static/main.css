@@ -6,3 +6,8 @@
 body {
   font-family: 'Roboto-Regular';
 }
+
+img.logo {
+  width: 32px;
+  height: 32px;
+}
