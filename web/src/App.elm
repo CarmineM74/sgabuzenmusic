@@ -40,7 +40,7 @@ defaultPresets =
     , { id = 1, nome = "Francesco", valore = 77, enabled = True }
     , { id = 2, nome = "Anna", valore = 80, enabled = True }
     , { id = 3, nome = "Enrico", valore = 9, enabled = True }
-    , { id = 4, nome = "Assunga", valore = 17, enabled = False }
+    , { id = 4, nome = "Assunta", valore = 17, enabled = False }
     ]
 
 
