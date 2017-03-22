@@ -5,7 +5,7 @@ import Html exposing (Html, text, div, h1, i, img, node, p)
 import Html.Attributes exposing (attribute, class, src)
 import Html.Events exposing (onClick, on)
 import Http
-import Json.Decode as JD
+import Json.Decode exposing (list, string, int, bool, Decoder)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Material
 import Material.Button as Button
@@ -29,21 +29,10 @@ type alias Model =
 
 
 type alias Preset =
-    { id : Int
-    , nome : String
-    , valore : Int
+    { name : String
+    , configuration : Int
     , enabled : Bool
     }
-
-
-defaultPresets : List Preset
-defaultPresets =
-    [ { id = 0, nome = "Carmine", valore = 74, enabled = True }
-    , { id = 1, nome = "Francesco", valore = 77, enabled = True }
-    , { id = 2, nome = "Anna", valore = 80, enabled = True }
-    , { id = 3, nome = "Enrico", valore = 9, enabled = True }
-    , { id = 4, nome = "Assunta", valore = 17, enabled = False }
-    ]
 
 
 init : String -> ( Model, Cmd Msg )
@@ -51,15 +40,32 @@ init path =
     ( { message = "Guitar router is loading ..."
       , logo = path
       , mdl = Material.model
-      , presets = defaultPresets
+      , presets = []
       }
-    , Layout.sub0 Mdl
+    , Cmd.batch [ Layout.sub0 Mdl, fetchPresetsCmd ]
     )
+
+
+fetchPresetsCmd : Cmd Msg
+fetchPresetsCmd =
+    list presetDecoder
+        |> Http.get "http://192.168.4.1/presets.json"
+        |> Http.send PresetsLoaded
+
+
+presetDecoder : Decoder Preset
+presetDecoder =
+    decode Preset
+        |> required "name" string
+        |> required "configuration" int
+        |> required "enabled" bool
 
 
 type Msg
     = NoOp
     | Mdl (Material.Msg Msg)
+    | LoadPresets
+    | PresetsLoaded (Result Http.Error (List Preset))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,6 +73,19 @@ update msg model =
     case msg of
         Mdl msg_ ->
             Material.update Mdl msg_ model
+
+        LoadPresets ->
+            ( model, fetchPresetsCmd )
+
+        PresetsLoaded (Err _) ->
+            let
+                _ =
+                    Debug.log "Update" "Loading presets failed"
+            in
+                ( model, Cmd.none )
+
+        PresetsLoaded (Ok newPresets) ->
+            ( { model | presets = newPresets }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -126,7 +145,7 @@ tableCard model =
         , Card.text [] [ table model ]
         , Card.actions
             [ Card.border ]
-            [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Tooltip.attach Mdl [ 1, 0 ] ] "update"
+            [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "update"
             , Tooltip.render Mdl [ 1, 0 ] model.mdl [ Tooltip.top ] [ text "Aggiorna" ]
             , actionButton model.mdl [ 0, 1 ] [ Button.accent, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
             , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
@@ -139,9 +158,8 @@ tableCard model =
 presetRow : Preset -> Html Msg
 presetRow preset =
     Table.tr []
-        [ Table.td [] [ text (toString preset.id) ]
-        , Table.td [] [ text preset.nome ]
-        , Table.td [ Table.numeric ] [ text (toString preset.valore) ]
+        [ Table.td [] [ text preset.name ]
+        , Table.td [ Table.numeric ] [ text (toString preset.configuration) ]
         , Table.td [] [ text (toString preset.enabled) ]
         ]
 
@@ -152,9 +170,8 @@ table model =
         [ Elevation.e2, Options.css "width" "98%" ]
         [ Table.thead []
             [ Table.tr []
-                [ Table.th [] [ text "Id" ]
-                , Table.th [] [ text "Nome" ]
-                , Table.th [ Table.numeric ] [ text "Valore" ]
+                [ Table.th [] [ text "Nome" ]
+                , Table.th [ Table.numeric ] [ text "Configurazione" ]
                 , Table.th [] [ text "Abilitato" ]
                 ]
             ]
@@ -162,7 +179,7 @@ table model =
             (List.map presetRow model.presets)
         , Table.tfoot []
             [ Table.tr []
-                [ Table.td [ Options.attribute <| attribute "colspan" "4" ] [ text "pagination goes here" ]
+                [ Table.td [ Options.attribute <| attribute "colspan" "3" ] [ text "pagination goes here" ]
                 ]
             ]
         ]
