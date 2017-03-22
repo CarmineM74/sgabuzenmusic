@@ -1,4 +1,8 @@
-var logoPath = require('../static/sgabuzen_music_logo.jpg');
-let Elm = require('./Main.elm')
-let root = document.getElementById('root')
-let app = Elm.Main.embed(root, logoPath)
+var logoPath = require('../static/sgabuzen_music_logo.jpg')
+require('../static/material-icons.css')
+require('../static/material.css')
+require('../static/material.js')
+require('../static/main.css')
+var Elm = require('./Main.elm')
+var root = document.getElementById('root')
+var app = Elm.Main.embed(root, logoPath)

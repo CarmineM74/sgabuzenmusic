@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Roboto-Regular';
-  src: url('/static/Roboto-Regular.ttf') format('truetype');
+  src: url('./roboto.woff2') format('woff2');
 }
 
 body {
