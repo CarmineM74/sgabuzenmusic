@@ -16,6 +16,8 @@ import Material.Icon as Icon
 import Material.Layout as Layout
 import Material.Options as Options
 import Material.Table as Table
+import Material.Textfield as Textfield
+import Material.Toggles as Toggles
 import Material.Tooltip as Tooltip
 import Material.Typography as Typo
 
@@ -25,6 +27,8 @@ type alias Model =
     , logo : String
     , mdl : Material.Model
     , presets : List Preset
+    , editMode : Bool
+    , preset : Maybe Preset
     }
 
 
@@ -35,14 +39,27 @@ type alias Preset =
     }
 
 
+fakeData : List Preset
+fakeData =
+    [ Preset "Carmine" 74 True
+    , Preset "Francesco" 77 True
+    , Preset "Anna" 80 True
+    , Preset "Enrico" 9 True
+    , Preset "Assunta" 17 False
+    ]
+
+
 init : String -> ( Model, Cmd Msg )
 init path =
     ( { message = "Guitar router is loading ..."
       , logo = path
       , mdl = Material.model
-      , presets = []
+      , presets = fakeData
+      , editMode = False
+      , preset = Nothing
       }
-    , Cmd.batch [ Layout.sub0 Mdl, fetchPresetsCmd ]
+    , Cmd.batch [ Layout.sub0 Mdl ]
+      --, fetchPresetsCmd ]
     )
 
 
@@ -66,6 +83,7 @@ type Msg
     | Mdl (Material.Msg Msg)
     | LoadPresets
     | PresetsLoaded (Result Http.Error (List Preset))
+    | EditPreset
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,7 +93,8 @@ update msg model =
             Material.update Mdl msg_ model
 
         LoadPresets ->
-            ( model, fetchPresetsCmd )
+            --( model, fetchPresetsCmd )
+            ( { model | presets = fakeData }, Cmd.none )
 
         PresetsLoaded (Err _) ->
             let
@@ -86,6 +105,9 @@ update msg model =
 
         PresetsLoaded (Ok newPresets) ->
             ( { model | presets = newPresets }, Cmd.none )
+
+        EditPreset ->
+            ( { model | editMode = True }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -114,9 +136,77 @@ header model =
 
 body : Model -> Html Msg
 body model =
-    div []
-        [ tableCard model
-        ]
+    case model.editMode of
+        False ->
+            div []
+                [ tableCard model
+                ]
+
+        True ->
+            editView model
+
+
+editView : Model -> Html Msg
+editView model =
+    let
+        editHeaderText =
+            case model.preset of
+                Nothing ->
+                    "Nuovo preset"
+
+                Just _ ->
+                    "Modifica preset"
+
+        preset =
+            case model.preset of
+                Nothing ->
+                    Preset "" 0 False
+
+                Just p ->
+                    p
+    in
+        Card.view
+            [ Elevation.e2
+            , Options.css "width" "98%"
+            , Options.css "margin-top" "10px"
+            , Options.css "margin-left" "2px"
+            , Options.css "margin-right" "2px"
+            ]
+            [ Card.title [] [ Card.head [] [ text editHeaderText ] ]
+            , Card.text []
+                [ Textfield.render Mdl
+                    [ 0, 0, 0 ]
+                    model.mdl
+                    [ Textfield.label "Nome"
+                    , Textfield.floatingLabel
+                    , Textfield.text_
+                    , Textfield.maxlength 16
+                    ]
+                    []
+                , Textfield.render Mdl
+                    [ 0, 0, 1 ]
+                    model.mdl
+                    [ Textfield.label "Configurazione"
+                    , Textfield.floatingLabel
+                    , Textfield.text_
+                    ]
+                    []
+                , Toggles.switch Mdl
+                    [ 0, 0, 2 ]
+                    model.mdl
+                    [ Toggles.ripple
+                    , Toggles.value preset.enabled
+                    ]
+                    []
+                ]
+            , Card.actions
+                [ Card.border ]
+                [ actionButton model.mdl [ 0, 4 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "clear"
+                , Tooltip.render Mdl [ 1, 4 ] model.mdl [ Tooltip.top ] [ text "Annulla" ]
+                , actionButton model.mdl [ 0, 5 ] [ Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 1 ] ] "check_circle"
+                , Tooltip.render Mdl [ 1, 5 ] model.mdl [ Tooltip.top ] [ text "Conferma" ]
+                ]
+            ]
 
 
 actionButton : Material.Model -> List Int -> List (Button.Property Msg) -> String -> Html Msg
@@ -147,10 +237,12 @@ tableCard model =
             [ Card.border ]
             [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "update"
             , Tooltip.render Mdl [ 1, 0 ] model.mdl [ Tooltip.top ] [ text "Aggiorna" ]
-            , actionButton model.mdl [ 0, 1 ] [ Button.accent, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
+            , actionButton model.mdl [ 0, 1 ] [ Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
             , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
-            , actionButton model.mdl [ 0, 2 ] [ Button.disabled, Tooltip.attach Mdl [ 1, 2 ] ] "remove_circle"
-            , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
+            , actionButton model.mdl [ 0, 2 ] [ Button.disabled, Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 2 ] ] "create"
+            , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Modifica preset" ]
+            , actionButton model.mdl [ 0, 3 ] [ Button.disabled, Tooltip.attach Mdl [ 1, 2 ] ] "remove_circle"
+            , Tooltip.render Mdl [ 1, 3 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
             ]
         ]
 
