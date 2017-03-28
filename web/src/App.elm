@@ -83,6 +83,7 @@ type Msg
     | Mdl (Material.Msg Msg)
     | LoadPresets
     | PresetsLoaded (Result Http.Error (List Preset))
+    | SelectPreset Preset
     | EditPreset
 
 
@@ -105,6 +106,9 @@ update msg model =
 
         PresetsLoaded (Ok newPresets) ->
             ( { model | presets = newPresets }, Cmd.none )
+
+        SelectPreset selectedPreset ->
+            ( { model | preset = Just selectedPreset }, Cmd.none )
 
         EditPreset ->
             ( { model | editMode = True }, Cmd.none )
@@ -181,6 +185,7 @@ editView model =
                     , Textfield.floatingLabel
                     , Textfield.text_
                     , Textfield.maxlength 16
+                    , Textfield.value preset.name
                     ]
                     []
                 , Textfield.render Mdl
@@ -189,6 +194,7 @@ editView model =
                     [ Textfield.label "Configurazione"
                     , Textfield.floatingLabel
                     , Textfield.text_
+                    , Textfield.value (toString preset.configuration)
                     ]
                     []
                 , Toggles.switch Mdl
@@ -249,7 +255,7 @@ tableCard model =
 
 presetRow : Preset -> Html Msg
 presetRow preset =
-    Table.tr []
+    Table.tr [ Options.onClick (SelectPreset preset) ]
         [ Table.td [] [ text preset.name ]
         , Table.td [ Table.numeric ] [ text (toString preset.configuration) ]
         , Table.td [] [ text (toString preset.enabled) ]
