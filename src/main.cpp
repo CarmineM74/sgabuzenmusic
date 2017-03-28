@@ -17,9 +17,9 @@
 #define OFF                                             false
 #define SECOND                                          1000
 #define MINUTE                                          60 * SECOND
-#define JSON_BUFFER_SIZE                                1024
 #define MAX_PRESETS                                     32
 #define PRESET_NAME_MAX_LEN                             32
+#define JSON_BUFFER_SIZE                                1024
 #define AP_NAME                                         "SGABAP"
 #define AP_PASSWORD                                     "DEADBEEF"
 
@@ -169,13 +169,13 @@ void load_config() {
 
   state.config_file_found = true;
   size_t size = configFile.size();
-  if (size > JSON_BUFFER_SIZE) {
-    printer.println("Config file size is too large");
-    remove_config_file();
-    save_config();
-    mainFsm.transitionTo(EnableAP);
-    return;
-  }
+  // if (size > JSON_BUFFER_SIZE) {
+  //   printer.println("Config file size is too large");
+  //   remove_config_file();
+  //   save_config();
+  //   mainFsm.transitionTo(EnableAP);
+  //   return;
+  // }
 
   // Allocate a buffer to store contents of the file.
   std::unique_ptr<char[]> buf(new char[size]);
@@ -185,7 +185,7 @@ void load_config() {
   // use configFile.readString instead.
   configFile.readBytes(buf.get(), size);
 
-  StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
   JsonObject& json = jsonBuffer.parseObject(buf.get());
 
   if (!json.success()) {
@@ -224,7 +224,7 @@ void remove_config_file() {
 }
 
 bool save_config() {
-  StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
   JsonObject& json = jsonBuffer.createObject();
   json["configVersion"] = state.configVersion.c_str();;
   // json["ssid"] = state.ssid.c_str();
@@ -274,8 +274,7 @@ bool handleFileRead(String path) {
   return false;
 }
 
-JsonObject& serializePreset(Preset ps) {
-  StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
+JsonObject& serializePreset(JsonBuffer& jsonBuffer, Preset ps) {
   JsonObject& o = jsonBuffer.createObject();
   o.set("name", ps.name);
   o.set("enabled", ps.enabled);
@@ -292,23 +291,35 @@ void configure_web_routes() {
 
   // GET /presets.html
   server.on("/presets.json", HTTP_GET, [](){
-    StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
-    JsonArray &data = root.createNestedArray("presets");
-    state.presets[0].name = "Test preset";
-    state.presets[0].configuration = 255;
+    DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
+    JsonArray &data = jsonBuffer.createArray();
+    state.presets[0].name = "Carmine";
+    state.presets[0].configuration = 74;
     state.presets[0].enabled = true;
-    state.presetCount = 1;
+    state.presets[1].name = "Francesco";
+    state.presets[1].configuration = 77;
+    state.presets[1].enabled = true;
+    state.presets[2].name = "Anna";
+    state.presets[2].configuration = 80;
+    state.presets[2].enabled = true;
+    state.presets[3].name = "Enrico";
+    state.presets[3].configuration = 9;
+    state.presets[3].enabled = true;
+    state.presets[4].name = "Assunta";
+    state.presets[4].configuration = 17;
+    state.presets[4].enabled = true;
+    state.presetCount = 5;
     printer.println("Serializing " + String(state.presetCount) + " presets");
     for(int i=0; i<state.presetCount; i++) {
-      printer.println("Serializing preset: " + String(i));
-      data.add(serializePreset(state.presets[i]));
+      printer.print("Serializing preset: " + String(i));
+      printer.println(" - " + state.presets[i].name);
+      data.add(serializePreset(jsonBuffer, state.presets[i]));
     }
-    int buffer_size = root.measureLength()+1;
+    int buffer_size = data.measureLength()+1;
     printer.println("Dimensione del buffer: " + String(buffer_size) + "...");
     char *buffer = (char*)malloc(buffer_size*sizeof(char));
-    root.printTo(buffer, buffer_size);
-    root.printTo(Serial);
+    data.printTo(buffer, buffer_size);
+    data.printTo(Serial);
     server.send(200, "application/json", buffer);
     free(buffer);
     buffer = 0;

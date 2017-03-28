@@ -85,6 +85,8 @@ type Msg
     | PresetsLoaded (Result Http.Error (List Preset))
     | SelectPreset Preset
     | EditPreset
+    | CancelEdit
+    | SaveEdit Preset
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,8 +115,24 @@ update msg model =
         EditPreset ->
             ( { model | editMode = True }, Cmd.none )
 
+        CancelEdit ->
+            ( { model | editMode = False }, Cmd.none )
+
+        SaveEdit editedPreset ->
+            ( { model
+                | editMode = False
+                , presets = updatePresets model.presets editedPreset
+              }
+            , Cmd.none
+            )
+
         _ ->
             ( model, Cmd.none )
+
+
+updatePresets : List Preset -> Preset -> List Preset
+updatePresets presets preset =
+    presets
 
 
 view : Model -> Html Msg
@@ -188,7 +206,9 @@ editView model =
                     , Textfield.value preset.name
                     ]
                     []
-                , Textfield.render Mdl
+                ]
+            , Card.text []
+                [ Textfield.render Mdl
                     [ 0, 0, 1 ]
                     model.mdl
                     [ Textfield.label "Configurazione"
@@ -197,7 +217,9 @@ editView model =
                     , Textfield.value (toString preset.configuration)
                     ]
                     []
-                , Toggles.switch Mdl
+                ]
+            , Card.text []
+                [ Toggles.switch Mdl
                     [ 0, 0, 2 ]
                     model.mdl
                     [ Toggles.ripple
@@ -207,9 +229,9 @@ editView model =
                 ]
             , Card.actions
                 [ Card.border ]
-                [ actionButton model.mdl [ 0, 4 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "clear"
+                [ actionButton model.mdl [ 0, 4 ] [ Button.primary, Options.onClick CancelEdit, Tooltip.attach Mdl [ 1, 0 ] ] "clear"
                 , Tooltip.render Mdl [ 1, 4 ] model.mdl [ Tooltip.top ] [ text "Annulla" ]
-                , actionButton model.mdl [ 0, 5 ] [ Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 1 ] ] "check_circle"
+                , actionButton model.mdl [ 0, 5 ] [ Button.accent, Options.onClick (SaveEdit preset), Tooltip.attach Mdl [ 1, 1 ] ] "check_circle"
                 , Tooltip.render Mdl [ 1, 5 ] model.mdl [ Tooltip.top ] [ text "Conferma" ]
                 ]
             ]
