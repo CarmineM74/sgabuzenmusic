@@ -186,6 +186,14 @@ editView model =
 
                 Just p ->
                     p
+
+        disabledStatus =
+            case model.preset of
+                Nothing ->
+                    Options.nop
+
+                Just _ ->
+                    Textfield.disabled
     in
         Card.view
             [ Elevation.e2
@@ -204,6 +212,7 @@ editView model =
                     , Textfield.text_
                     , Textfield.maxlength 16
                     , Textfield.value preset.name
+                    , disabledStatus
                     ]
                     []
                 ]
