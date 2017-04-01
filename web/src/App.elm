@@ -27,8 +27,9 @@ type alias Model =
     , logo : String
     , mdl : Material.Model
     , presets : List Preset
-    , editMode : Bool
+    , showEditForm : Bool
     , preset : Maybe Preset
+    , editMode : EditMode
     }
 
 
@@ -37,6 +38,17 @@ type alias Preset =
     , configuration : Int
     , enabled : Bool
     }
+
+
+emptyPreset : Preset
+emptyPreset =
+    Preset "" 0 False
+
+
+type EditMode
+    = NotEditing
+    | Update
+    | New
 
 
 fakeData : List Preset
@@ -55,8 +67,9 @@ init path =
       , logo = path
       , mdl = Material.model
       , presets = fakeData
-      , editMode = False
+      , showEditForm = False
       , preset = Nothing
+      , editMode = NotEditing
       }
     , Cmd.batch [ Layout.sub0 Mdl ]
       --, fetchPresetsCmd ]
@@ -84,9 +97,12 @@ type Msg
     | LoadPresets
     | PresetsLoaded (Result Http.Error (List Preset))
     | SelectPreset Preset
-    | EditPreset
+    | UpdatePreset
+    | AddPreset
     | CancelEdit
-    | SaveEdit Preset
+    | SaveEdit
+    | UpdateName String
+    | UpdateConfiguration String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -112,27 +128,93 @@ update msg model =
         SelectPreset selectedPreset ->
             ( { model | preset = Just selectedPreset }, Cmd.none )
 
-        EditPreset ->
-            ( { model | editMode = True }, Cmd.none )
+        UpdatePreset ->
+            ( { model | showEditForm = True, editMode = Update }, Cmd.none )
+
+        AddPreset ->
+            ( { model | showEditForm = True, editMode = New, preset = Just emptyPreset }, Cmd.none )
 
         CancelEdit ->
-            ( { model | editMode = False }, Cmd.none )
-
-        SaveEdit editedPreset ->
             ( { model
-                | editMode = False
-                , presets = updatePresets model.presets editedPreset
+                | showEditForm = False
+                , editMode = NotEditing
+                , preset = Nothing
               }
             , Cmd.none
             )
+
+        SaveEdit ->
+            ( { model
+                | showEditForm = False
+                , editMode = NotEditing
+                , presets = updatePresets model.presets model.preset
+                , preset = Nothing
+              }
+            , Cmd.none
+            )
+
+        UpdateName newName ->
+            let
+                newPreset =
+                    case model.preset of
+                        Nothing ->
+                            Nothing
+
+                        Just p ->
+                            Just (Preset newName p.configuration p.enabled)
+            in
+                ( { model
+                    | preset = newPreset
+                  }
+                , Cmd.none
+                )
+
+        UpdateConfiguration newConfig ->
+            let
+                newIntConfig =
+                    case String.toInt newConfig of
+                        Ok n ->
+                            n
+
+                        Err _ ->
+                            0
+
+                newPreset =
+                    case model.preset of
+                        Nothing ->
+                            Nothing
+
+                        Just p ->
+                            Just (Preset p.name newIntConfig p.enabled)
+            in
+                ( { model
+                    | preset = newPreset
+                  }
+                , Cmd.none
+                )
 
         _ ->
             ( model, Cmd.none )
 
 
-updatePresets : List Preset -> Preset -> List Preset
-updatePresets presets preset =
-    presets
+updatePresets : List Preset -> Maybe Preset -> List Preset
+updatePresets presets maybePreset =
+    case maybePreset of
+        Nothing ->
+            presets
+
+        Just preset ->
+            let
+                update p acc =
+                    case p.name == preset.name of
+                        False ->
+                            p :: acc
+
+                        True ->
+                            preset :: acc
+            in
+                presets
+                    |> List.foldr update []
 
 
 view : Model -> Html Msg
@@ -158,7 +240,7 @@ header model =
 
 body : Model -> Html Msg
 body model =
-    case model.editMode of
+    case model.showEditForm of
         False ->
             div []
                 [ tableCard model
@@ -172,27 +254,25 @@ editView : Model -> Html Msg
 editView model =
     let
         editHeaderText =
-            case model.preset of
-                Nothing ->
+            case model.editMode of
+                New ->
                     "Nuovo preset"
 
-                Just _ ->
+                Update ->
                     "Modifica preset"
 
-        preset =
-            case model.preset of
-                Nothing ->
-                    Preset "" 0 False
+                NotEditing ->
+                    "Big messup"
 
-                Just p ->
-                    p
+        preset =
+            Maybe.withDefault emptyPreset model.preset
 
         disabledStatus =
-            case model.preset of
-                Nothing ->
+            case model.editMode of
+                New ->
                     Options.nop
 
-                Just _ ->
+                _ ->
                     Textfield.disabled
     in
         Card.view
@@ -212,6 +292,7 @@ editView model =
                     , Textfield.text_
                     , Textfield.maxlength 16
                     , Textfield.value preset.name
+                    , Options.onInput UpdateName
                     , disabledStatus
                     ]
                     []
@@ -224,6 +305,7 @@ editView model =
                     , Textfield.floatingLabel
                     , Textfield.text_
                     , Textfield.value (toString preset.configuration)
+                    , Options.onInput UpdateConfiguration
                     ]
                     []
                 ]
@@ -240,7 +322,7 @@ editView model =
                 [ Card.border ]
                 [ actionButton model.mdl [ 0, 4 ] [ Button.primary, Options.onClick CancelEdit, Tooltip.attach Mdl [ 1, 0 ] ] "clear"
                 , Tooltip.render Mdl [ 1, 4 ] model.mdl [ Tooltip.top ] [ text "Annulla" ]
-                , actionButton model.mdl [ 0, 5 ] [ Button.accent, Options.onClick (SaveEdit preset), Tooltip.attach Mdl [ 1, 1 ] ] "check_circle"
+                , actionButton model.mdl [ 0, 5 ] [ Button.accent, Options.onClick SaveEdit, Tooltip.attach Mdl [ 1, 1 ] ] "check_circle"
                 , Tooltip.render Mdl [ 1, 5 ] model.mdl [ Tooltip.top ] [ text "Conferma" ]
                 ]
             ]
@@ -261,27 +343,36 @@ actionButton mdl btnIdx props iconName =
 
 tableCard : Model -> Html Msg
 tableCard model =
-    Card.view
-        [ Elevation.e2
-        , Options.css "width" "98%"
-        , Options.css "margin-top" "10px"
-        , Options.css "margin-left" "2px"
-        , Options.css "margin-right" "2px"
-        ]
-        [ Card.title [] [ Card.head [] [ text "Presets" ] ]
-        , Card.text [] [ table model ]
-        , Card.actions
-            [ Card.border ]
-            [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "update"
-            , Tooltip.render Mdl [ 1, 0 ] model.mdl [ Tooltip.top ] [ text "Aggiorna" ]
-            , actionButton model.mdl [ 0, 1 ] [ Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
-            , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
-            , actionButton model.mdl [ 0, 2 ] [ Button.disabled, Button.accent, Options.onClick EditPreset, Tooltip.attach Mdl [ 1, 2 ] ] "create"
-            , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Modifica preset" ]
-            , actionButton model.mdl [ 0, 3 ] [ Button.disabled, Tooltip.attach Mdl [ 1, 2 ] ] "remove_circle"
-            , Tooltip.render Mdl [ 1, 3 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
+    let
+        presetSelected =
+            case model.preset of
+                Nothing ->
+                    Button.disabled
+
+                _ ->
+                    Options.nop
+    in
+        Card.view
+            [ Elevation.e2
+            , Options.css "width" "98%"
+            , Options.css "margin-top" "10px"
+            , Options.css "margin-left" "2px"
+            , Options.css "margin-right" "2px"
             ]
-        ]
+            [ Card.title [] [ Card.head [] [ text "Presets" ] ]
+            , Card.text [] [ table model ]
+            , Card.actions
+                [ Card.border ]
+                [ actionButton model.mdl [ 0, 0 ] [ Button.primary, Options.onClick LoadPresets, Tooltip.attach Mdl [ 1, 0 ] ] "update"
+                , Tooltip.render Mdl [ 1, 0 ] model.mdl [ Tooltip.top ] [ text "Aggiorna" ]
+                , actionButton model.mdl [ 0, 1 ] [ Button.accent, Options.onClick AddPreset, Tooltip.attach Mdl [ 1, 1 ] ] "add_circle"
+                , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
+                , actionButton model.mdl [ 0, 2 ] [ presetSelected, Button.accent, Options.onClick UpdatePreset, Tooltip.attach Mdl [ 1, 2 ] ] "create"
+                , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Modifica preset" ]
+                , actionButton model.mdl [ 0, 3 ] [ presetSelected, Tooltip.attach Mdl [ 1, 3 ] ] "remove_circle"
+                , Tooltip.render Mdl [ 1, 3 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
+                ]
+            ]
 
 
 presetRow : Preset -> Html Msg
