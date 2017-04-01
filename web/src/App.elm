@@ -144,14 +144,26 @@ update msg model =
             )
 
         SaveEdit ->
-            ( { model
-                | showEditForm = False
-                , editMode = NotEditing
-                , presets = updatePresets model.presets model.preset
-                , preset = Nothing
-              }
-            , Cmd.none
-            )
+            let
+                newPresets =
+                    case ( model.editMode, model.preset ) of
+                        ( New, Just newPreset ) ->
+                            newPreset :: model.presets
+
+                        ( Update, updatedPreset ) ->
+                            updatePresets model.presets updatedPreset
+
+                        _ ->
+                            model.presets
+            in
+                ( { model
+                    | showEditForm = False
+                    , editMode = NotEditing
+                    , presets = newPresets
+                    , preset = Nothing
+                  }
+                , Cmd.none
+                )
 
         UpdateName newName ->
             let
