@@ -22,6 +22,11 @@ import Material.Tooltip as Tooltip
 import Material.Typography as Typo
 
 
+-- Using a Maybe Preset with void messages forces us to do a lot of destructuring
+-- and pattern matching with Maybe.
+-- See, for example, editing the selected preset and/or deleting it.
+
+
 type alias Model =
     { message : String
     , logo : String
