@@ -99,6 +99,7 @@ type Msg
     | SelectPreset Preset
     | UpdatePreset
     | AddPreset
+    | DeletePreset
     | CancelEdit
     | SaveEdit
     | UpdateName String
@@ -133,6 +134,23 @@ update msg model =
 
         AddPreset ->
             ( { model | showEditForm = True, editMode = New, preset = Just emptyPreset }, Cmd.none )
+
+        DeletePreset ->
+            let
+                newPresets =
+                    case model.preset of
+                        Nothing ->
+                            model.presets
+
+                        Just preset ->
+                            List.filter (\p -> p.name /= preset.name) model.presets
+            in
+                ( { model
+                    | presets = newPresets
+                    , preset = Nothing
+                  }
+                , Cmd.none
+                )
 
         CancelEdit ->
             ( { model
@@ -381,7 +399,7 @@ tableCard model =
                 , Tooltip.render Mdl [ 1, 1 ] model.mdl [ Tooltip.top ] [ text "Nuovo preset" ]
                 , actionButton model.mdl [ 0, 2 ] [ presetSelected, Button.accent, Options.onClick UpdatePreset, Tooltip.attach Mdl [ 1, 2 ] ] "create"
                 , Tooltip.render Mdl [ 1, 2 ] model.mdl [ Tooltip.top ] [ text "Modifica preset" ]
-                , actionButton model.mdl [ 0, 3 ] [ presetSelected, Tooltip.attach Mdl [ 1, 3 ] ] "remove_circle"
+                , actionButton model.mdl [ 0, 3 ] [ presetSelected, Options.onClick DeletePreset, Tooltip.attach Mdl [ 1, 3 ] ] "remove_circle"
                 , Tooltip.render Mdl [ 1, 3 ] model.mdl [ Tooltip.top ] [ text "Elimina preset" ]
                 ]
             ]
