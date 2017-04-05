@@ -135,12 +135,18 @@ update msg model =
             ( { model | preset = Just selectedPreset }, Cmd.none )
 
         UpdatePreset ->
+            -- 1. Update selected preset
+            -- 2. Also return a command to push the updated preset to the backend
             ( { model | showEditForm = True, editMode = Update }, Cmd.none )
 
         AddPreset ->
+            -- 1. Add preset to current presets
+            -- 2. Also return a command to push the newly added preset to the backend
             ( { model | showEditForm = True, editMode = New, preset = Just emptyPreset }, Cmd.none )
 
         DeletePreset ->
+            -- 1. Delete preset from current presets
+            -- 2. Also return a command to ask the backend to delete the preset by "name"
             let
                 newPresets =
                     case model.preset of
