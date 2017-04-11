@@ -71,13 +71,12 @@ init path =
     ( { message = "Guitar router is loading ..."
       , logo = path
       , mdl = Material.model
-      , presets = fakeData
+      , presets = []
       , showEditForm = False
       , preset = Nothing
       , editMode = NotEditing
       }
-    , Cmd.batch [ Layout.sub0 Mdl ]
-      --, fetchPresetsCmd ]
+    , Cmd.batch [ Layout.sub0 Mdl, fetchPresetsCmd ]
     )
 
 
@@ -86,6 +85,40 @@ fetchPresetsCmd =
     list presetDecoder
         |> Http.get "http://192.168.4.1/presets.json"
         |> Http.send PresetsLoaded
+
+
+deletePresetCmd : String -> Cmd Msg
+deletePresetCmd name =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = ("http://192.168.4.1/delete?name=" ++ name)
+        , body = Http.emptyBody
+        , expect = Http.expectStringResponse handleDeleteResponse
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        |> Http.send PresetDeleted
+
+
+handleDeleteResponse : Http.Response body -> Result String String
+handleDeleteResponse response =
+    let
+        _ =
+            Debug.log "Response is: " response
+
+        statusCode =
+            response.status.code
+
+        statusMessage =
+            response.status.message
+    in
+        case statusCode of
+            200 ->
+                Ok statusMessage
+
+            _ ->
+                Err "DELETE FAILED"
 
 
 presetDecoder : Decoder Preset
@@ -101,6 +134,7 @@ type Msg
     | Mdl (Material.Msg Msg)
     | LoadPresets
     | PresetsLoaded (Result Http.Error (List Preset))
+    | PresetDeleted (Result Http.Error String)
     | SelectPreset Preset
     | UpdatePreset
     | AddPreset
@@ -145,23 +179,27 @@ update msg model =
             ( { model | showEditForm = True, editMode = New, preset = Just emptyPreset }, Cmd.none )
 
         DeletePreset ->
-            -- 1. Delete preset from current presets
-            -- 2. Also return a command to ask the backend to delete the preset by "name"
             let
-                newPresets =
+                name =
                     case model.preset of
                         Nothing ->
-                            model.presets
+                            ""
 
-                        Just preset ->
-                            List.filter (\p -> p.name /= preset.name) model.presets
+                        Just p ->
+                            p.name
             in
                 ( { model
-                    | presets = newPresets
-                    , preset = Nothing
+                    | preset = Nothing
                   }
-                , Cmd.none
+                , deletePresetCmd name
                 )
+
+        PresetDeleted r ->
+            let
+                _ =
+                    Debug.log "PresetDeleted" r
+            in
+                ( model, fetchPresetsCmd )
 
         CancelEdit ->
             ( { model

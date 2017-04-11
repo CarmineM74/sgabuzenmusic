@@ -61,13 +61,6 @@ State FailedToStart = State(failed_to_start);
 
 FSM mainFsm = FSM(Boot);
 
-struct Preset {
-  //char name[PRESET_NAME_MAX_LEN];
-  String name;
-  byte configuration;
-  bool enabled;
-};
-
 struct AppState {
   String id;
   String fwVersion;
@@ -89,6 +82,30 @@ AppState state;
 
 TimedAction everySecondAction       = TimedAction(1 * SECOND, secondElapsed);
 
+void setupFakePresets() {
+  state.presets[0].name = "Carmine";
+  state.presets[0].configuration = 74;
+  state.presets[0].enabled = true;
+  state.presets[0].deleted = false;
+  state.presets[1].name = "Francesco";
+  state.presets[1].configuration = 77;
+  state.presets[1].enabled = true;
+  state.presets[1].deleted = false;
+  state.presets[2].name = "Anna";
+  state.presets[2].configuration = 80;
+  state.presets[2].enabled = true;
+  state.presets[2].deleted = false;
+  state.presets[3].name = "Enrico";
+  state.presets[3].configuration = 9;
+  state.presets[3].enabled = true;
+  state.presets[3].deleted = false;
+  state.presets[4].name = "Assunta";
+  state.presets[4].configuration = 17;
+  state.presets[4].enabled = true;
+  state.presets[4].deleted = false;
+  state.presetCount = 5;
+}
+
 void setup() {
   // Da salvare nel file di configurazione:
   // - fwVersion
@@ -103,6 +120,9 @@ void setup() {
   state.currentPreset = 0;
   state.presetCount = 0;
   state.enabledPresetCount = 0;
+
+  // FAKE PRESETS
+  setupFakePresets();
 }
 
 void boot() {
@@ -226,16 +246,19 @@ void remove_config_file() {
 bool save_config() {
   DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
   JsonObject& json = jsonBuffer.createObject();
-  json["configVersion"] = state.configVersion.c_str();;
-  // json["ssid"] = state.ssid.c_str();
-  // json["password"] = state.wifi_password.c_str();
+  json["configVersion"] = state.configVersion.c_str();
+  JsonArray &data = jsonBuffer.createArray();
+  serializePresetsToJson(jsonBuffer, data);
+  json["presets"] = data;
   File configFile = SPIFFS.open(CONFIG_FILE, "w");
   if (!configFile) {
     printer.println("Failed to open config file for writing");
     return false;
   } else {
+    printer.println("*** SAVING CONFIGURATION ***");
+    json.printTo(Serial);
     json.printTo(configFile);
-    printer.println("*** CONFIGURATION SAVED ***");
+    printer.println("\n*** CONFIGURATION SAVED ***");
     return true;
   }
 }
@@ -282,9 +305,32 @@ JsonObject& serializePreset(JsonBuffer& jsonBuffer, Preset ps) {
   return o;
 }
 
+void serializePresetsToJson(JsonBuffer& jsonBuffer, JsonArray& data) {
+  for(int i=0; i<state.presetCount; i++) {
+    if (!state.presets[i].deleted) {
+      printer.print("Serializing preset: " + String(i));
+      printer.println(" - " + state.presets[i].name);
+      data.add(serializePreset(jsonBuffer, state.presets[i]));
+    }
+  }
+}
+
+String deletePreset(String name) {
+  for(int i=0; i<state.presetCount; i++) {
+    if (state.presets[i].name == name) {
+      printer.println("Marking " + name + " DELETED!");
+      state.presets[i].deleted = true;
+      return "OK";
+    }
+  }
+  return "NOT FOUND";
+}
+
 void configure_web_routes() {
   // GET /
   server.on("/",HTTP_GET,[](){
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     if(!handleFileRead("/index.html"))
       server.send(404, "text/plain", "404. NOT FOUND");
   });
@@ -293,36 +339,43 @@ void configure_web_routes() {
   server.on("/presets.json", HTTP_GET, [](){
     DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
     JsonArray &data = jsonBuffer.createArray();
-    state.presets[0].name = "Carmine";
-    state.presets[0].configuration = 74;
-    state.presets[0].enabled = true;
-    state.presets[1].name = "Francesco";
-    state.presets[1].configuration = 77;
-    state.presets[1].enabled = true;
-    state.presets[2].name = "Anna";
-    state.presets[2].configuration = 80;
-    state.presets[2].enabled = true;
-    state.presets[3].name = "Enrico";
-    state.presets[3].configuration = 9;
-    state.presets[3].enabled = true;
-    state.presets[4].name = "Assunta";
-    state.presets[4].configuration = 17;
-    state.presets[4].enabled = true;
-    state.presetCount = 5;
+
+    // Non serializziamo quelli marcati per la cancellazione
     printer.println("Serializing " + String(state.presetCount) + " presets");
-    for(int i=0; i<state.presetCount; i++) {
-      printer.print("Serializing preset: " + String(i));
-      printer.println(" - " + state.presets[i].name);
-      data.add(serializePreset(jsonBuffer, state.presets[i]));
-    }
+
+    serializePresetsToJson(jsonBuffer, data);
+
     int buffer_size = data.measureLength()+1;
     printer.println("Dimensione del buffer: " + String(buffer_size) + "...");
     char *buffer = (char*)malloc(buffer_size*sizeof(char));
     data.printTo(buffer, buffer_size);
     data.printTo(Serial);
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     server.send(200, "application/json", buffer);
     free(buffer);
     buffer = 0;
+  });
+
+  server.on("/delete", HTTP_OPTIONS, [](){
+    printer.println("HTTP_OPTIONS");
+    server.sendHeader("Access-Control-Max-Age", "10000");
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    server.send(200, "text/plain", "" );
+  });
+
+  server.on("/delete", HTTP_DELETE, [](){
+    printer.println("/delete SERVER ARGS: " + server.arg(0));
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    String deleted_status = deletePreset(server.arg(0));
+    int status = 200;
+    if (deleted_status != "OK")
+      status = 404;
+    else
+      save_config();
+    server.send(status, "application/text", deleted_status);
   });
 
   server.onNotFound( []() {
