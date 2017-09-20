@@ -1,5 +1,6 @@
-import App from './App.vue'
+import Dashboard from './Dashboard.vue'
 
 export const routes = [
-  { path: '', component: App}
+  { path: '', component: Dashboard},
+  { path: '*', component: { template: '<h1>Nothing to see here!</h1>' } }
 ]
