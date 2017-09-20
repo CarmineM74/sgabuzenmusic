@@ -82,6 +82,8 @@ AppState state;
 
 TimedAction everySecondAction       = TimedAction(1 * SECOND, secondElapsed);
 
+// TODO:
+// DELETE THIS FUNCTION
 void setupFakePresets() {
   state.presets[0].name = "Carmine";
   state.presets[0].configuration = 74;
@@ -230,9 +232,6 @@ void load_config() {
     return;
   }
 
-  // state.ssid = (const char*)json["ssid"];
-  // state.wifi_password = (const char*)json["password"];
-  //state.wifi_configured = true;
   json.printTo(Serial);
   printer.println("");
   mainFsm.transitionTo(EnableAP);
@@ -339,12 +338,7 @@ void configure_web_routes() {
   server.on("/presets.json", HTTP_GET, [](){
     DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
     JsonArray &data = jsonBuffer.createArray();
-
-    // Non serializziamo quelli marcati per la cancellazione
-    printer.println("Serializing " + String(state.presetCount) + " presets");
-
     serializePresetsToJson(jsonBuffer, data);
-
     int buffer_size = data.measureLength()+1;
     printer.println("Dimensione del buffer: " + String(buffer_size) + "...");
     char *buffer = (char*)malloc(buffer_size*sizeof(char));
@@ -398,7 +392,7 @@ void filterPresets() {
   Preset p;
   for(int i=0; i<state.presetCount; i++) {
     p = state.presets[i];
-    if (p.enabled) {
+    if (!p.deleted && p.enabled) {
       state.enabledPresets[state.enabledPresetCount] = p;
       state.enabledPresetCount++;
     }

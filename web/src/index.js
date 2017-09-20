@@ -1,8 +1,0 @@
-var logoPath = require('../static/sgabuzen_music_logo.jpg')
-require('../static/material-icons.css')
-require('../static/material.css')
-require('../static/material.js')
-require('../static/main.css')
-var Elm = require('./Main.elm')
-var root = document.getElementById('root')
-var app = Elm.Main.embed(root, logoPath)
