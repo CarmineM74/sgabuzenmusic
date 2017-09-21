@@ -22,6 +22,11 @@ const store = new Vuex.Store({
     presetCount: (state, getters) => {
       return state.presets.length
     }
+  },
+  mutations: {
+    addPreset (state, preset) {
+      state.presets.push(preset)
+    }
   }
 })
 
