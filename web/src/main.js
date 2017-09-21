@@ -21,6 +21,12 @@ const store = new Vuex.Store({
   state: {
     presets: []
   },
+  actions: {
+    [ADD_PRESET] (context, payload) {
+      console.log('Doing some async stuff, maybe with backend')
+      context.commit(ADD_PRESET, payload)
+    }
+  },
   getters: {
     presetCount: (state, getters) => {
       return state.presets.length

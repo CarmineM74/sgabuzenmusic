@@ -20,7 +20,9 @@ import { ADD_PRESET } from './mutation-types'
 export default {
   name: 'Dashboard',
   methods: {
-    ...mapMutations([ADD_PRESET])
+    [ADD_PRESET] (preset) {
+      this.$store.dispatch(ADD_PRESET, preset)
+    }
   },
   computed: {
     presets () {
