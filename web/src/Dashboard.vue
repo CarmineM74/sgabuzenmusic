@@ -19,7 +19,7 @@ export default {
       return this.$store.state.presets
     },
     presetCount () {
-      return this.$store.state.presetCount
+      return this.$store.getters.presetCount
     }
   }
 }

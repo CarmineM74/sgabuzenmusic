@@ -16,8 +16,12 @@ const router = new VueRouter({
 
 const store = new Vuex.Store({
   state: {
-    presets: [],
-    presetCount: 0
+    presets: []
+  },
+  getters: {
+    presetCount: (state, getters) => {
+      return state.presets.length
+    }
   }
 })
 
@@ -31,9 +35,7 @@ new Vue({
   created () {
     const vm = this
     setTimeout(() => {
-      console.log('Changing store.state with: ', presets)
       vm.$store.state.presets = presets
-      vm.$store.state.presetCount = presets.length
       console.log(vm.$store.state)
     }, 2000)
   }
