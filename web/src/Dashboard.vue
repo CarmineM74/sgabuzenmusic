@@ -12,15 +12,16 @@
 </template>
 
 <script>
+
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'Dashboard',
   computed: {
     presets () {
       return this.$store.state.presets
     },
-    presetCount () {
-      return this.$store.getters.presetCount
-    }
+    ...mapGetters(['presetCount'])
   }
 }
 </script>
