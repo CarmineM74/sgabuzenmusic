@@ -6,7 +6,7 @@
       <p v-if="presetCount == 0" class="card-text">Nothing yet</p>
       <p v-else class="card-text">There are {{ presetCount }} presets</p>
       <ul v-if="presetCount > 0">
-        <li v-for="preset in presets" key="preset.id">{{preset.name}}</li>
+        <li v-for="preset in presets" :key="preset.id">{{preset.name}}</li>
       </ul>
     </div>
   </div>
@@ -15,11 +15,12 @@
 <script>
 
 import { mapGetters, mapMutations } from 'vuex'
+import { ADD_PRESET } from './mutation-types'
 
 export default {
   name: 'Dashboard',
   methods: {
-    ...mapMutations(['addPreset'])
+    ...mapMutations([ADD_PRESET])
   },
   computed: {
     presets () {

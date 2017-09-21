@@ -2,8 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import { routes } from './routes'
+import { ADD_PRESET } from './mutation-types'
 
 import App from './App.vue'
+
+import presets from './assets/data/presets.js'
 
 Vue.use(Vuex)
 Vue.use(VueRouter)
@@ -24,13 +27,11 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
-    addPreset (state, preset) {
+    [ADD_PRESET] (state, preset) {
       state.presets.push(preset)
     }
   }
 })
-
-import presets from './assets/data/presets.js'
 
 new Vue({
   el: '#app',
