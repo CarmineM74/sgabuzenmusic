@@ -6,13 +6,18 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    presets: []
+    presets: [],
+    askDeleteConfimration: false
   },
   actions: {
     loadPresets ({state, commit}) {
       setTimeout(() => {
         commit('loadPresets', {presets: presets})
       }, 2000)
+    },
+    removePreset ({state, commit}, preset_id) {
+      console.log('Deleting preset: ', preset_id)
+      commit('deletePreset', {id: preset_id})
     }
   },
   getters: {
@@ -21,11 +26,17 @@ export default new Vuex.Store({
     },
     presetCount: (state, getters) => {
       return state.presets.length
+    },
+    askDeleteConfirmation: (state, getters) => {
+      return state.askDeleteConfimration
     }
   },
   mutations: {
     loadPresets (state, payload) {
       state.presets = [...payload.presets]
+    },
+    deletePreset (state, payload) {
+      state.askDeleteConfimration = true
     }
   }
 })

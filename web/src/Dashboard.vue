@@ -24,23 +24,31 @@
             <td>
               <button class="btn btn-primary btn-sm"><i class="fa fa-edit" aria-hidden="true"></i></button>
               &nbsp
-              <button class="btn btn-danger btn-sm"><i class="fa fa-trash" aria-hidden="true"></i></button>
+              <button class="btn btn-danger btn-sm" v-on:click="removePreset(preset.id)"><i class="fa fa-trash" aria-hidden="true"></i></button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <div class="modal fade" v-modal="askDeleteConfirmation" id="deleteConfirmation" tabindex="-1" role="dialog">
+      Sei sicuro di voler rimuovere il preset?
+    </div>
+
   </div>
 </template>
 
 <script>
+import BootstrapVue from 'bootstrap-vue'
 
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Dashboard',
   computed: {
-    ...mapGetters(['presets', 'presetCount'])
+    ...mapGetters(['presets', 'presetCount', 'askDeleteConfirmation'])
+  },
+  methods: {
+    ...mapActions(['removePreset'])
   },
   created () {
     this.$store.dispatch('loadPresets')
