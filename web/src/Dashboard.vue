@@ -4,6 +4,7 @@
       <img src="./assets/Gear.gif" alt="gear" class="image-responsive center-block">
     </div>
     <div class="col-md-12 center-block" v-else>
+      <button class="btn btn-primary"><i class="fa fa-plus"></i> Aggiungi preset</button>
       <table class="table table-striped table-hover">
         <thead>
           <tr>
