@@ -13,7 +13,7 @@ export default new Vuex.Store({
     loadPresets ({state, commit}) {
       setTimeout(() => {
         commit('loadPresets', {presets: presets})
-      }, 2000)
+      }, 1000)
     },
     removePreset ({state, commit}, preset_id) {
       console.log('Deleting preset: ', preset_id)

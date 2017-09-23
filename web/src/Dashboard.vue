@@ -17,7 +17,7 @@
 </template>
 
 <script>
-
+import PresetTableOpts from './PresetTableOpts.vue'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -28,7 +28,8 @@ export default {
         {title: 'Id', key: 'id'},
         {title: 'Nome', key: 'name', sortable: true},
         {title: 'Valore', key: 'value'},
-        {title: 'Attivo', key: 'enabled', sortable: true}
+        {title: 'Attivo', key: 'enabled', sortable: true},
+        {title: 'Azioni', key: 'actions', align: 'center', render: (h, params) => h(PresetTableOpts)}
       ]
     }
   },
