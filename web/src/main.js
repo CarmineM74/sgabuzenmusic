@@ -1,14 +1,14 @@
 import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import iView from 'iview'
+import 'iview/dist/styles/iview.css'
+
 import VueRouter from 'vue-router'
 import { routes } from './routes'
 import Store from './store'
 
 import App from './App.vue'
 
-Vue.use(BootstrapVue)
+Vue.use(iView)
 Vue.use(VueRouter)
 
 const router = new VueRouter({
