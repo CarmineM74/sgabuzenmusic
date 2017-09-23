@@ -20,7 +20,11 @@
             <td>{{preset.name}}</td>
             <td>{{preset.value}}</td>
             <td>{{preset.enabled}}</td>
-            <td>EDIT / DELETE</td>
+            <td>
+              <button class="btn btn-primary btn-sm"><i class="fa fa-edit" aria-hidden="true"></i></button>
+              &nbsp
+              <button class="btn btn-danger btn-sm"><i class="fa fa-trash" aria-hidden="true"></i></button>
+            </td>
           </tr>
         </tbody>
       </table>
