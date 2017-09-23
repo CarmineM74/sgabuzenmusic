@@ -1,34 +1,44 @@
 <template>
-  <div class="card">
-    <div class="card-body">
-      <h4 class="card-title">Dashboard</h4>
-      <button class="btn btn-primary" @click="addPreset({id: 999, name: 'Added', value: 1974, enabled: false})">Add Preset</button>
-      <p v-if="presetCount == 0" class="card-text">Nothing yet</p>
-      <p v-else class="card-text">There are {{ presetCount }} presets</p>
-      <ul v-if="presetCount > 0">
-        <li v-for="preset in presets" :key="preset.id">{{preset.name}}</li>
-      </ul>
+  <div class="row">
+    <div v-if="presetCount==0" class="col-md-12">
+      <img src="./assets/Gear.gif" alt="gear" class="image-responsive center-block">
+    </div>
+    <div class="col-md-12 center-block" v-else>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Nome</th>
+            <th>Valore</th>
+            <th>Abilitato</th>
+            <th>Operazioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="preset in presets" key="preset.id">
+            <td>{{preset.id}}</td>
+            <td>{{preset.name}}</td>
+            <td>{{preset.value}}</td>
+            <td>{{preset.enabled}}</td>
+            <td>EDIT / DELETE</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script>
 
-import { mapGetters, mapMutations } from 'vuex'
-import { ADD_PRESET } from './mutation-types'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'Dashboard',
-  methods: {
-    [ADD_PRESET] (preset) {
-      this.$store.dispatch(ADD_PRESET, preset)
-    }
-  },
   computed: {
-    presets () {
-      return this.$store.state.presets
-    },
-    ...mapGetters(['presetCount'])
+    ...mapGetters(['presets', 'presetCount'])
+  },
+  created () {
+    this.$store.dispatch('loadPresets')
   }
 }
 </script>
