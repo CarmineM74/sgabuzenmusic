@@ -29,7 +29,11 @@ export default {
         {title: 'Nome', key: 'name', sortable: true},
         {title: 'Valore', key: 'value'},
         {title: 'Attivo', key: 'enabled', sortable: true},
-        {title: 'Azioni', key: 'actions', align: 'center', render: (h, params) => h(PresetTableOpts)}
+        {title: 'Azioni',
+          key: 'actions',
+          align: 'center',
+          render: (h, params) => h(PresetTableOpts, {props: {item_id: params.index}})
+        }
       ]
     }
   },

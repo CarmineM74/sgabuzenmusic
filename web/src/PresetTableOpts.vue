@@ -7,7 +7,10 @@
 
 <script>
 export default {
-
+  props: ['item_id'],
+  created () {
+    console.log(this.item_id)
+  }
 }
 </script>
 
