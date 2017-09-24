@@ -25,7 +25,7 @@ export default {
   .layout-logo{
       width: 30px;
       height: 30px;
-      background-image: url('assets/sgabuzen_music_logo.jpg');
+      background-image: url('./assets/sgabuzen_music_logo.jpg');
       background-size: 30px;
       border-radius: 3px;
       float: left;
