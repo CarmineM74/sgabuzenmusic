@@ -4,7 +4,7 @@
     </Row>
     <div v-else>
       <Row type="flex">
-        <Col span="4">
+        <Col span="24">
           <Button type="primary"><i class="fa fa-plus"></i> Aggiungi preset</Button>
         </Col>
       </Row>
@@ -46,7 +46,4 @@ export default {
 </script>
 
 <style>
-  .gear {
-    text-align: center;
-  }
 </style>

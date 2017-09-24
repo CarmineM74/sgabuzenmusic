@@ -1,21 +1,12 @@
 <template>
   <div class="layout">
-    <Row type="flex">
-      <Col span="4" class="layout-menu-left">
-        <Menu theme="dark" width="auto">
-          <div class="layout-logo-left">
-            <img src="./assets/sgabuzen_music_logo.jpg" class="sgabuzen-logo" alt="logo">
-            <span class="motto">Sgabuzen Music</span>
-          </div>
-          <MenuItem name="dashboard">Dashboard</MenuItem>
-        </Menu>
-      </Col>
-      <Col span="20">
-        <div class="layout-content">
-          <router-view></router-view>
-        </div>
-      </Col>
-    </Row>
+    <Menu mode="horizontal" theme="dark" width="auto">
+      <div class="layout-logo"></div>
+      <span class="motto">Sgabuzen Music</span>
+    </Menu>
+    <div class="layout-content">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -30,22 +21,21 @@ export default {
   .layout{
       border: 1px solid #d7dde4;
       background: #f5f7f9;
-      position: relative;
   }
-  .layout-menu-left{
-      background: #464c5b;
-  }
-  .layout-header{
-      height: 60px;
-      background: #fff;
-      box-shadow: 0 1px 1px rgba(0,0,0,.1);
-  }
-  .layout-logo-left{
-      width: 90%;
+  .layout-logo{
+      width: 30px;
       height: 30px;
-      background: #5b6270;
+      background-image: url('assets/sgabuzen_music_logo.jpg');
+      background-size: 30px;
       border-radius: 3px;
-      margin: 15px auto;
+      float: left;
+      position: relative;
+      top: 15px;
+      left: 20px;
+  }
+  .layout-nav{
+      width: 420px;
+      margin: 0 auto;
   }
   .layout-content{
       min-height: 200px;
@@ -57,7 +47,7 @@ export default {
   .motto {
     color: white;
     vertical-align: top;
-    margin-left: 10px;
+    margin-left: 40px;
   }
   .sgabuzen-logo {
     width: 30px;
