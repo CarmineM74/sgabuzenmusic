@@ -16,8 +16,6 @@
 
 <script>
 
-import { mapActions } from 'vuex'
-
 export default {
   props: ['item_id'],
   data () {
@@ -26,17 +24,17 @@ export default {
     }
   },
   created () {
-    console.log(this.item_id)
+    console.log(this.itemId)
   },
   methods: {
-    editPreset (item_id) {
-      this.$router.push({path: `/edit/${item_id}`})
+    editPreset (itemId) {
+      this.$router.push({path: `/edit/${itemId}`})
     },
     deletePreset () {
       this.askDeleteConfirmation = true
     },
-    ok (item_id) {
-      this.$store.dispatch('deletePreset', item_id)
+    ok (itemId) {
+      this.$store.dispatch('deletePreset', itemId)
       this.$Message.success('Preset eliminato!')
     },
     cancel () {

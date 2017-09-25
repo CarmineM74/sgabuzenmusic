@@ -6,35 +6,44 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    presets: []
+    presets: [],
+    loading: false
   },
   actions: {
     loadPresets ({state, commit}) {
+      commit('loading', {status: true})
       setTimeout(() => {
         commit('loadPresets', {presets: presets})
+        commit('loading', {status: false})
       }, 1000)
     },
-    deletePreset ({state, commit}, preset_id) {
-      console.log('Deleting preset: ', preset_id)
-      commit('deletePreset', {id: preset_id})
+    deletePreset ({state, commit}, presetId) {
+      console.log('Deleting preset: ', presetId)
+      commit('deletePreset', {id: presetId})
     }
   },
   getters: {
     presets: (state, getters) => {
       return state.presets
     },
+    loading: (state) => {
+      return state.loading
+    },
     presetCount: (state, getters) => {
       return state.presets.length
     }
   },
   mutations: {
+    loading (state, payload) {
+      state.loading = payload.status
+    },
     loadPresets (state, payload) {
       state.presets = [...payload.presets]
     },
     deletePreset (state, payload) {
       console.log('Committing deletePreset mutation: ', payload)
-      const new_presets = state.presets.filter((preset) => { return preset.id != payload.id })
-      this.state.presets = new_presets
+      const newPresets = state.presets.filter((preset) => { return preset.id !== payload.id })
+      this.state.presets = newPresets
     }
   }
 })

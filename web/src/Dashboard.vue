@@ -1,11 +1,12 @@
 <template>
-    <Row type="flex" justify="center" align="middle" v-if="presetCount==0">
+    <Row type="flex" justify="center" align="middle" v-if="(presetCount==0) || loading">
       <img src="./assets/Gear.gif" alt="gear" class="gear">
     </Row>
     <div v-else>
       <Row type="flex">
         <Col span="24">
           <Button type="primary"><i class="fa fa-plus"></i> Aggiungi preset</Button>
+          <Button @click="loadPresets"><i class="fa fa-refresh"></i> Aggiorna elenco preset</Button>
         </Col>
       </Row>
       <Row type="flex">
@@ -38,10 +39,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['presets', 'presetCount', 'askDeleteConfirmation'])
+    ...mapGetters(['presets', 'presetCount', 'loading'])
   },
   methods: {
-    ...mapActions(['removePreset'])
+    ...mapActions(['removePreset', 'loadPresets'])
   },
   created () {
     this.$store.dispatch('loadPresets')
