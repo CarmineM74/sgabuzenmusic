@@ -19,7 +19,7 @@
 
 <script>
 import PresetTableOpts from './PresetTableOpts.vue'
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Dashboard',
@@ -33,19 +33,20 @@ export default {
           key: 'actions',
           align: 'center',
           width: 150,
-          render: (h, params) => h(PresetTableOpts, {props: {item_id: params.row.id}})
+          render: (h, params) => h(PresetTableOpts, {props: {itemId: params.row.id}})
         }
       ]
     }
   },
   computed: {
-    ...mapGetters(['presets', 'presetCount', 'loading'])
+    ...mapGetters(['presetCount']),
+    ...mapState(['presets', 'loading'])
   },
   methods: {
-    ...mapActions(['removePreset', 'loadPresets'])
+    ...mapActions(['loadPresets'])
   },
   created () {
-    this.$store.dispatch('loadPresets')
+    this.loadPresets()
   }
 }
 </script>

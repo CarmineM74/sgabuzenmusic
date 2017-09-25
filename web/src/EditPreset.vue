@@ -1,26 +1,37 @@
 <template>
-  <div>
-    <h4>Nothing here </h4>
-    <p>
-      {{preset}}
-    </p>
-  </div>
+  <Form :model="preset" >
+    <FormItem label="Nome">
+      <Input v-model="preset.name" placeholder="Nome"></Input>
+    </FormItem>
+    <FormItem label="Valore">
+      <Input v-model="preset.value" placeholder="Valore"></Input>
+    </FormItem>
+    <FormItem label="Abilitato">
+      <i-switch v-model="preset.enabled" size="large">
+        <span slot="true">Si</span>
+        <span slot="false">No</span>
+      </i-switch>
+    </FormItem>
+    <Button type="success" @click="goBack"><i class="fa fa-check"></i> Salva</Button>
+    <Button type="error" @click="goBack"><i class="fa fa-ban"></i> Annulla</Button>
+  </Form>
 </template>
 
 <script>
 export default {
   name: 'EditPreset',
-  created () {
-    console.log('Editing preset: ', this.$route.params)
-  },
   data () {
     return {
     }
   },
   computed: {
     preset () {
-      console.log('Fetching preset: ', this.$route.params)
-      return this.$store.state.presets[this.$route.params.presetId]
+      return this.$store.state.presets.find(pres => pres.id === this.$route.params.presetId)
+    }
+  },
+  methods: {
+    goBack () {
+      this.$router.back()
     }
   }
 }

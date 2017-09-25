@@ -23,12 +23,6 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    presets: (state, getters) => {
-      return state.presets
-    },
-    loading: (state) => {
-      return state.loading
-    },
     presetCount: (state, getters) => {
       return state.presets.length
     }
