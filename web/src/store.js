@@ -25,9 +25,6 @@ export default new Vuex.Store({
     },
     presetCount: (state, getters) => {
       return state.presets.length
-    },
-    askDeleteConfirmation: (state, getters) => {
-      return state.askDeleteConfimration
     }
   },
   mutations: {
@@ -35,7 +32,9 @@ export default new Vuex.Store({
       state.presets = [...payload.presets]
     },
     deletePreset (state, payload) {
-      console.log('Committing deletePreset mutation')
+      console.log('Committing deletePreset mutation: ', payload)
+      const new_presets = state.presets.filter((preset) => { return preset.id != payload.id })
+      this.state.presets = new_presets
     }
   }
 })
