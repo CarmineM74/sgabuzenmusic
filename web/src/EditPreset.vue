@@ -22,16 +22,18 @@ export default {
   name: 'EditPreset',
   data () {
     return {
+      preset: undefined
     }
   },
-  computed: {
-    preset () {
-      return this.$store.state.presets.find(pres => pres.id === this.$route.params.presetId)
-    }
+  created () {
+    this.preset = this.getPreset(this.$route.params.presetId)
   },
   methods: {
     goBack () {
       this.$router.back()
+    },
+    getPreset (presetId) {
+      return this.$store.state.presets.find(pres => pres.id == presetId)
     }
   }
 }

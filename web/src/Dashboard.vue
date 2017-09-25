@@ -46,6 +46,7 @@ export default {
     ...mapActions(['loadPresets'])
   },
   created () {
+    console.log('Creating Dashboard ...')
     this.loadPresets()
   }
 }
