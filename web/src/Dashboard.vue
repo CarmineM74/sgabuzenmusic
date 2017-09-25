@@ -25,13 +25,13 @@ export default {
   data () {
     return {
       columns: [
-        {title: 'Id', key: 'id'},
         {title: 'Nome', key: 'name', sortable: true},
-        {title: 'Valore', key: 'value'},
-        {title: 'Attivo', key: 'enabled', sortable: true},
+        {title: 'Valore', key: 'value', width: 100},
+        {title: 'Attivo', key: 'enabled', sortable: true, width: 100},
         {title: 'Azioni',
           key: 'actions',
           align: 'center',
+          width: 150,
           render: (h, params) => h(PresetTableOpts, {props: {item_id: params.index}})
         }
       ]

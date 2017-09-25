@@ -6,8 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    presets: [],
-    askDeleteConfimration: false
+    presets: []
   },
   actions: {
     loadPresets ({state, commit}) {
@@ -15,7 +14,7 @@ export default new Vuex.Store({
         commit('loadPresets', {presets: presets})
       }, 1000)
     },
-    removePreset ({state, commit}, preset_id) {
+    deletePreset ({state, commit}, preset_id) {
       console.log('Deleting preset: ', preset_id)
       commit('deletePreset', {id: preset_id})
     }
@@ -36,7 +35,7 @@ export default new Vuex.Store({
       state.presets = [...payload.presets]
     },
     deletePreset (state, payload) {
-      state.askDeleteConfimration = true
+      console.log('Committing deletePreset mutation')
     }
   }
 })
