@@ -25,9 +25,6 @@ export default {
       askDeleteConfirmation: false
     }
   },
-  created () {
-    console.log('PresetTableOpts for', this.itemId)
-  },
   methods: {
     ...mapActions(['deletePreset']),
     editPreset (itemId) {
@@ -41,7 +38,6 @@ export default {
       this.$Message.success('Preset eliminato!')
     },
     cancel () {
-      console.log("I've changed my mind")
       this.$Message.warning('Operazione annullata')
     }
   }
