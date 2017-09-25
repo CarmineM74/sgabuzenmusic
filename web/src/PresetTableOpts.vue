@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Button type="primary"><i class="fa fa-edit"></i></Button> 
+    <Button type="primary" @click.stop="editPreset(item_id)"><i class="fa fa-edit"></i></Button> 
     <Button type="error" @click.stop="deletePreset"><i class="fa fa-trash"></i></Button>
     <Modal
       v-model="askDeleteConfirmation"
@@ -29,6 +29,9 @@ export default {
     console.log(this.item_id)
   },
   methods: {
+    editPreset (item_id) {
+      this.$router.push({path: `/edit/${item_id}`})
+    },
     deletePreset () {
       this.askDeleteConfirmation = true
     },
