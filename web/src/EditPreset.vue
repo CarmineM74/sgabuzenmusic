@@ -12,12 +12,13 @@
         <span slot="false">No</span>
       </i-switch>
     </FormItem>
-    <Button type="success" @click="goBack"><i class="fa fa-check"></i> Salva</Button>
+    <Button type="success" @click="save"><i class="fa fa-check"></i> Salva</Button>
     <Button type="error" @click="goBack"><i class="fa fa-ban"></i> Annulla</Button>
   </Form>
 </template>
 
 <script>
+
 export default {
   name: 'EditPreset',
   data () {
@@ -31,6 +32,11 @@ export default {
   methods: {
     goBack () {
       this.$router.back()
+    },
+    save () {
+      this.$store.dispatch('savePreset', this.preset)
+      this.$Message.success('Modifiche salvate!')
+      this.goBack()
     },
     getPreset (presetId) {
       return this.$store.state.presets.find(pres => pres.id == presetId)

@@ -20,6 +20,10 @@ export default new Vuex.Store({
     deletePreset ({state, commit}, presetId) {
       console.log('Deleting preset: ', presetId)
       commit('deletePreset', {id: presetId})
+    },
+    savePreset ({state, commit}, preset) {
+      console.log('Persisting changes: ', preset)
+      commit('savePreset', {preset: preset})
     }
   },
   getters: {
@@ -38,6 +42,9 @@ export default new Vuex.Store({
       console.log('Committing deletePreset mutation: ', payload)
       const newPresets = state.presets.filter((preset) => { return preset.id !== payload.id })
       this.state.presets = newPresets
+    },
+    savePreset (state, payload) {
+      console.log('Saving changes ...')
     }
   }
 })
