@@ -27,7 +27,18 @@ export default {
     }
   },
   created () {
-    this.preset = this.getPreset(this.$route.params.presetId)
+    if (this.$router.params) {
+      console.log('EDIT')
+      this.preset = this.getPreset(this.$route.params.presetId)
+    } else {
+      console.log('NEW')
+      this.preset = {
+        id: 0,
+        name: '',
+        value: 0,
+        enabled: false
+      }
+    }
   },
   methods: {
     goBack () {

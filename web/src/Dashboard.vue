@@ -5,7 +5,7 @@
     <div v-else>
       <Row type="flex">
         <Col span="24">
-          <Button type="primary"><i class="fa fa-plus"></i> Aggiungi preset</Button>
+          <Button type="primary" @click="newPreset"><i class="fa fa-plus"></i> Aggiungi preset</Button>
           <Button @click="loadPresets"><i class="fa fa-refresh"></i> Aggiorna elenco preset</Button>
         </Col>
       </Row>
@@ -43,7 +43,10 @@ export default {
     ...mapState(['presets', 'loading'])
   },
   methods: {
-    ...mapActions(['loadPresets'])
+    ...mapActions(['loadPresets']),
+    newPreset () {
+      this.$router.push('/new')
+    }
   },
   created () {
     console.log('Creating Dashboard ...')

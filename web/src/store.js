@@ -45,6 +45,16 @@ export default new Vuex.Store({
     },
     savePreset (state, payload) {
       console.log('Saving changes ...')
+      if (payload.preset.id == 0) {
+        console.log('CREATE')
+        payload.preset.id = state.presets[state.presets.length - 1].id + 1
+        state.presets = [
+          ...state.presets,
+          payload.preset
+        ]
+      } else {
+        console.log('UPDATE')
+      }
     }
   }
 })
