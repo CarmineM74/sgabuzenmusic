@@ -19,6 +19,7 @@
 
 <script>
 import PresetTableOpts from './PresetTableOpts.vue'
+import EnabledStatusGlyph from './EnabledStatusGlyph.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -27,8 +28,14 @@ export default {
     return {
       columns: [
         {title: 'Nome', key: 'name', sortable: true},
-        {title: 'Valore', key: 'value', width: 100},
-        {title: 'Attivo', key: 'enabled', sortable: true, width: 100},
+        {title: 'Valore', key: 'value', width: 100, align: 'center'},
+        {title: 'Attivo',
+          key: 'enabled',
+          sortable: true,
+          width: 80,
+          align: 'center',
+          render: (h, params) => h(EnabledStatusGlyph, { props: { status: params.row.enabled } })
+        },
         {title: 'Azioni',
           key: 'actions',
           align: 'center',
