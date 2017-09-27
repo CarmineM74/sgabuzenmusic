@@ -29,7 +29,14 @@ export default new Vuex.Store({
     },
     deletePreset ({state, commit}, presetId) {
       console.log('Deleting preset: ', presetId)
-      commit('deletePreset', {id: presetId})
+      axios.delete('/delete', { params: {id: presetId} })
+        .then(response => {
+          console.log('DONE DELETING: ', response)
+          commit('deletePreset', {name: presetId})
+        })
+        .catch(error => {
+          console.log('ERROR DELETING PRESET: ', error)
+        })
     },
     savePreset ({state, commit}, preset) {
       console.log('Persisting changes: ', preset)
@@ -50,7 +57,7 @@ export default new Vuex.Store({
     },
     deletePreset (state, payload) {
       console.log('Committing deletePreset mutation: ', payload)
-      const newPresets = state.presets.filter((preset) => { return preset.id !== payload.id })
+      const newPresets = state.presets.filter((preset) => { return preset.name !== payload.name })
       this.state.presets = newPresets
     },
     savePreset (state, payload) {

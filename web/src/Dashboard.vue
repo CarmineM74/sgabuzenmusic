@@ -40,7 +40,7 @@ export default {
           key: 'actions',
           align: 'center',
           width: 150,
-          render: (h, params) => h(PresetTableOpts, {props: {itemId: params.row.id}})
+          render: (h, params) => h(PresetTableOpts, {props: {itemId: params.row.name}})
         }
       ]
     }

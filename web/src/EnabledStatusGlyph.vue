@@ -5,9 +5,6 @@
 <script>
 export default {
   props: ['status'],
-  created () {
-    console.log('Status: ', this.status)
-  },
   computed: {
     glyph () {
       if (this.status) {
