@@ -1,8 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Axios from 'axios'
 import presets from './assets/data/presets.js'
 
 Vue.use(Vuex)
+
+const axios = Axios.create({
+  baseURL: 'http://192.168.4.1'
+})
 
 export default new Vuex.Store({
   state: {
@@ -12,10 +17,15 @@ export default new Vuex.Store({
   actions: {
     loadPresets ({state, commit}) {
       commit('loading', {status: true})
-      setTimeout(() => {
-        commit('loadPresets', {presets: presets})
-        commit('loading', {status: false})
-      }, 1000)
+      axios.get('/presets.json')
+        .then(response => {
+          console.log('DONE FETCHING PRESETS: ', response)
+          commit('loadPresets', {presets: response.data})
+          commit('loading', {status: false})
+        })
+        .catch(error => {
+          console.log('ERROR FETCHING PRESETS: ', error)
+        })
     },
     deletePreset ({state, commit}, presetId) {
       console.log('Deleting preset: ', presetId)
