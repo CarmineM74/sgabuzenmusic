@@ -4,7 +4,7 @@
       <Input v-model="preset.name" placeholder="Nome"></Input>
     </FormItem>
     <FormItem label="Valore">
-      <Input v-model="preset.value" placeholder="Valore"></Input>
+      <Input v-model="preset.configuration" placeholder="Valore"></Input>
     </FormItem>
     <FormItem label="Abilitato">
       <i-switch v-model="preset.enabled" size="large">
@@ -35,7 +35,7 @@ export default {
       this.preset = {
         id: 0,
         name: '',
-        value: 0,
+        configuration: 0,
         enabled: false
       }
     }

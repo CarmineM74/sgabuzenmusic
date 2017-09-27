@@ -28,7 +28,7 @@ export default {
     return {
       columns: [
         {title: 'Nome', key: 'name', sortable: true},
-        {title: 'Valore', key: 'value', width: 100, align: 'center'},
+        {title: 'Valore', key: 'configuration', width: 100, align: 'center'},
         {title: 'Attivo',
           key: 'enabled',
           sortable: true,
