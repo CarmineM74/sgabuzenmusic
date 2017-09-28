@@ -233,6 +233,7 @@ void load_config() {
   }
 
   json.printTo(Serial);
+  state.presetCount = (json["presets"].asArray()).size();
   printer.println("");
   mainFsm.transitionTo(EnableAP);
 }
@@ -325,6 +326,32 @@ String deletePreset(String name) {
   return "NOT FOUND";
 }
 
+bool hasPreset(String name) {
+  bool result = false;
+  for(int i=0; i<state.presetCount; i++)
+    result = result || (state.presets[i].name == name);
+  return result;
+}
+
+String addPreset(String params) {
+  DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
+  JsonObject& json = jsonBuffer.parseObject(params);
+  json.printTo(Serial);
+  printer.println("");
+  if ((state.presetCount+1) > MAX_PRESETS)
+    return "MAX PRESET COUNT REACHED!";
+  if (!hasPreset(json["params"]["name"])) {
+    printer.println("ADDING PRESET:");
+    state.presets[state.presetCount].name = json["params"]["name"].asString();
+    state.presets[state.presetCount].configuration = String(json["params"]["configuration"].asString()).toInt();
+    state.presets[state.presetCount].enabled = json["params"]["enabled"];
+    state.presetCount++;
+    return "OK";
+  } else {
+    return "ALREADY EXIST";
+  }
+}
+
 void configure_web_routes() {
   // GET /
   server.on("/",HTTP_GET,[](){
@@ -370,6 +397,27 @@ void configure_web_routes() {
     else
       save_config();
     server.send(status, "application/text", deleted_status);
+  });
+
+  server.on("/create", HTTP_OPTIONS, [](){
+    printer.println("HTTP_OPTIONS");
+    server.sendHeader("Access-Control-Max-Age", "10000");
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    server.send(200, "text/plain", "" );
+  });
+
+  server.on("/create", HTTP_POST, [](){
+    printer.println("/create SERVER ARGS: " + server.arg("plain"));
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    String create_status = addPreset(server.arg("plain"));
+    int status = 200;
+    if (create_status != "OK")
+      status = 404;
+    else
+      save_config();
+    server.send(status, "application/text", create_status);
   });
 
   server.onNotFound( []() {
@@ -438,6 +486,7 @@ void init_complete() {
     printer.println("[init_complete]")
            .println("Configuring buttons ...");
     configureButtons();
+    printer.println("PresetCount: " + String(state.presetCount));
     printer.println("SYSTEM READY");
   }
 }

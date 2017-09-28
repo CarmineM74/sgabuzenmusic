@@ -64,11 +64,23 @@ export default new Vuex.Store({
       console.log('Saving changes ...')
       if (payload.preset.id == 0) {
         console.log('CREATE')
-        payload.preset.id = state.presets[state.presets.length - 1].id + 1
-        state.presets = [
-          ...state.presets,
-          payload.preset
-        ]
+        axios.post('/create', {
+          params: {
+            name: payload.preset.name,
+            configuration: payload.preset.configuration,
+            enabled: payload.preset.enabled
+          }
+        })
+          .then(response => {
+            payload.preset.id = state.presets[state.presets.length - 1].id + 1
+            state.presets = [
+              ...state.presets,
+              payload.preset
+            ]
+          })
+          .catch(error => {
+            console.log('ERROR CREATING PRESET: ', error)
+          })
       } else {
         console.log('UPDATE')
       }
