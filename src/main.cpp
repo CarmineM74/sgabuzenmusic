@@ -124,7 +124,7 @@ void setup() {
   state.enabledPresetCount = 0;
 
   // FAKE PRESETS
-  setupFakePresets();
+  //setupFakePresets();
 }
 
 void boot() {
@@ -234,6 +234,11 @@ void load_config() {
 
   json.printTo(Serial);
   state.presetCount = (json["presets"].asArray()).size();
+  for(int i = 0; i < state.presetCount; i++) {
+    state.presets[i].name = json["presets"][i]["name"].asString();
+    state.presets[i].configuration = String(json["presets"][i]["configuration"].asString()).toInt();
+    state.presets[i].enabled = json["presets"][i]["enabled"];
+  }
   printer.println("");
   mainFsm.transitionTo(EnableAP);
 }
