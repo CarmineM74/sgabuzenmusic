@@ -320,21 +320,35 @@ void serializePresetsToJson(JsonBuffer& jsonBuffer, JsonArray& data) {
   }
 }
 
-String deletePreset(String name) {
-  for(int i=0; i<state.presetCount; i++) {
-    if (state.presets[i].name == name) {
-      printer.println("Marking " + name + " DELETED!");
-      state.presets[i].deleted = true;
-      return "OK";
+int indexOfPreset(String name) {
+  int idx = 0;
+  bool found = false;
+  for(idx = 0; idx < state.presetCount; idx++) {
+    if (state.presets[idx].name == name) {
+      found = true;
+      break;
     }
   }
-  return "NOT FOUND";
+  if (found)
+    return idx;
+  else
+    return -1;
+}
+
+String deletePreset(String name) {
+  int idx = indexOfPreset(name);
+  if (idx >= 0) {
+    printer.println("Marking " + name + " DELETED!");
+    state.presets[idx].deleted = true;
+    return "OK";
+  } else {
+    return "NOT FOUND";
+  }
 }
 
 bool hasPreset(String name) {
   bool result = false;
-  for(int i=0; i<state.presetCount; i++)
-    result = result || (state.presets[i].name == name);
+  result = (indexOfPreset(name) >= 0);
   return result;
 }
 
@@ -351,9 +365,30 @@ String addPreset(String params) {
     state.presets[state.presetCount].configuration = String(json["params"]["configuration"].asString()).toInt();
     state.presets[state.presetCount].enabled = json["params"]["enabled"];
     state.presetCount++;
+    printer.println("PRESET ADDED");
     return "OK";
   } else {
+    printer.println("PRESET ALREADY EXISTS");
     return "ALREADY EXIST";
+  }
+}
+
+String updatePreset(String params) {
+  DynamicJsonBuffer jsonBuffer(JSON_BUFFER_SIZE);
+  JsonObject& json = jsonBuffer.parseObject(params);
+  json.printTo(Serial);
+  printer.println("");
+  int idx = indexOfPreset(json["params"]["name"].asString());
+  if (idx >= 0) {
+    printer.println("UPDATING PRESET:");
+    state.presets[idx].name = json["params"]["name"].asString();
+    state.presets[idx].configuration = String(json["params"]["configuration"].asString()).toInt();
+    state.presets[idx].enabled = json["params"]["enabled"];
+    printer.println("PRESET UPDATED");
+    return "OK";
+  } else {
+    printer.println("PRESET NOT FOUND");
+    return "NOT FOUND";
   }
 }
 
@@ -423,6 +458,27 @@ void configure_web_routes() {
     else
       save_config();
     server.send(status, "application/text", create_status);
+  });
+
+  server.on("/update", HTTP_OPTIONS, [](){
+    printer.println("HTTP_OPTIONS");
+    server.sendHeader("Access-Control-Max-Age", "10000");
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    server.send(200, "text/plain", "" );
+  });
+
+  server.on("/update", HTTP_PUT, [](){
+    printer.println("/update SERVER ARGS: " + server.arg("plain"));
+    server.sendHeader("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    String update_status = updatePreset(server.arg("plain"));
+    int status = 200;
+    if (update_status != "OK")
+      status = 404;
+    else
+      save_config();
+    server.send(status, "application/text", update_status);
   });
 
   server.onNotFound( []() {

@@ -1,7 +1,7 @@
 <template>
   <Form :model="preset" >
     <FormItem label="Nome">
-      <Input v-model="preset.name" placeholder="Nome"></Input>
+      <Input v-model="preset.name" placeholder="Nome" :disabled="update"></Input>
     </FormItem>
     <FormItem label="Valore">
       <Input v-model="preset.configuration" placeholder="Valore"></Input>
@@ -23,17 +23,19 @@ export default {
   name: 'EditPreset',
   data () {
     return {
-      preset: undefined
+      preset: undefined,
+      update: false
     }
   },
   created () {
-    if (this.$router.params) {
+    console.log('[EditPreset] Router Params: ', this.$route.params)
+    if (this.$route.params.presetId) {
       console.log('EDIT')
       this.preset = this.getPreset(this.$route.params.presetId)
+      this.update = true
     } else {
       console.log('NEW')
       this.preset = {
-        id: 0,
         name: '',
         configuration: 0,
         enabled: false
@@ -45,12 +47,12 @@ export default {
       this.$router.back()
     },
     save () {
-      this.$store.dispatch('savePreset', this.preset)
+      this.$store.dispatch('savePreset', {preset: this.preset, isNew: !this.update})
       this.$Message.success('Modifiche salvate!')
       this.goBack()
     },
     getPreset (presetId) {
-      return this.$store.state.presets.find(pres => pres.id == presetId)
+      return this.$store.state.presets.find(pres => pres.name == presetId)
     }
   }
 }

@@ -5,9 +5,7 @@
       <span class="motto">Sgabuzen Music</span>
     </Menu>
     <div class="layout-content">
-      <keep-alive>
         <router-view></router-view>
-      </keep-alive>
     </div>
   </div>
 </template>

@@ -38,9 +38,9 @@ export default new Vuex.Store({
           console.log('ERROR DELETING PRESET: ', error)
         })
     },
-    savePreset ({state, commit}, preset) {
-      console.log('Persisting changes: ', preset)
-      commit('savePreset', {preset: preset})
+    savePreset ({state, commit}, payload) {
+      console.log('Persisting changes: ', payload)
+      commit('savePreset', payload)
     }
   },
   getters: {
@@ -60,22 +60,23 @@ export default new Vuex.Store({
       const newPresets = state.presets.filter((preset) => { return preset.name !== payload.name })
       this.state.presets = newPresets
     },
-    savePreset (state, payload) {
+    savePreset (state, {preset, isNew}) {
       console.log('Saving changes ...')
-      if (payload.preset.id == 0) {
+      console.log('isNew', isNew)
+      console.log('Preset', preset)
+      if (isNew == true) {
         console.log('CREATE')
         axios.post('/create', {
           params: {
-            name: payload.preset.name,
-            configuration: payload.preset.configuration,
-            enabled: payload.preset.enabled
+            name: preset.name,
+            configuration: preset.configuration,
+            enabled: preset.enabled
           }
         })
           .then(response => {
-            payload.preset.id = state.presets[state.presets.length - 1].id + 1
             state.presets = [
               ...state.presets,
-              payload.preset
+              preset
             ]
           })
           .catch(error => {
@@ -83,6 +84,19 @@ export default new Vuex.Store({
           })
       } else {
         console.log('UPDATE')
+        axios.put('/update', {
+          params: {
+            name: preset.name,
+            configuration: preset.configuration,
+            enabled: preset.enabled
+          }
+        })
+          .then(response => {
+            console.log('UPDATED')
+          })
+          .catch(error => {
+            console.log('ERROR CREATING PRESET: ', error)
+          })
       }
     }
   }
