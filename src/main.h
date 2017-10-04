@@ -26,11 +26,15 @@ void init_complete();
 void failed_to_start();
 void secondElapsed();
 void handleButtons();
+void filterPresets();
 void handleNextClick(Button &btn);
 void handleRewindClick(Button &btn);
 void handlePrevClick(Button &btn);
 void performPreset();
+void shutdownExtenderOutput();
+String addPreset(String params);
 String deletePreset(String name);
+String updatePreset(String params);
 JsonObject& serializePreset(JsonBuffer& jsonBuffer, Preset ps);
 void serializePresetsToJson(JsonBuffer& jsonuffer, JsonArray& data);
 

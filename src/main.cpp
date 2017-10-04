@@ -12,6 +12,7 @@
 #include <FS.h>
 #include <LED.h>
 #include <Button.h>
+#include <pcf8574_esp.h>
 
 #define ON                                              true
 #define OFF                                             false
@@ -45,6 +46,10 @@ FluentPrint printer(&Serial);
 // Hardware configuration
 #define ONE_WIRE_BUS D3
 OneWire oneWire(ONE_WIRE_BUS);
+
+TwoWire twoWire;
+PCF857x pcf8574(0x38, &twoWire);
+
 
 // Other configurations
 ESP8266WebServer server(80);
@@ -364,6 +369,7 @@ String addPreset(String params) {
     state.presets[state.presetCount].name = json["params"]["name"].asString();
     state.presets[state.presetCount].configuration = String(json["params"]["configuration"].asString()).toInt();
     state.presets[state.presetCount].enabled = json["params"]["enabled"];
+    state.presets[state.presetCount].deleted = false;
     state.presetCount++;
     printer.println("PRESET ADDED");
     return "OK";
@@ -434,8 +440,10 @@ void configure_web_routes() {
     int status = 200;
     if (deleted_status != "OK")
       status = 404;
-    else
+    else {
       save_config();
+      filterPresets();
+    }
     server.send(status, "application/text", deleted_status);
   });
 
@@ -455,8 +463,10 @@ void configure_web_routes() {
     int status = 200;
     if (create_status != "OK")
       status = 404;
-    else
+    else {
       save_config();
+      filterPresets();
+    }
     server.send(status, "application/text", create_status);
   });
 
@@ -476,8 +486,10 @@ void configure_web_routes() {
     int status = 200;
     if (update_status != "OK")
       status = 404;
-    else
+    else {
       save_config();
+      filterPresets();
+    }
     server.send(status, "application/text", update_status);
   });
 
@@ -513,6 +525,7 @@ void performPreset() {
   printer.println("[performPreset]")
          .println("Sending preset Nr. " + String(state.currentPreset))
          .println(String(preset.name) + ": " + String(preset.configuration,16));
+  pcf8574.write8(preset.configuration);
 }
 
 void handleNextClick(Button &btn) {
@@ -547,9 +560,25 @@ void init_complete() {
     printer.println("[init_complete]")
            .println("Configuring buttons ...");
     configureButtons();
+    printer.println("Configuring extender ...");
+    twoWire.setClock(100000L);
+    pcf8574.begin();
+    printer.println("Shutting down extender's outputs ...");
+    shutdownExtenderOutput();
     printer.println("PresetCount: " + String(state.presetCount));
     printer.println("SYSTEM READY");
   }
+}
+
+void shutdownExtenderOutput() {
+  pcf8574.write(0,LOW);
+  pcf8574.write(1,LOW);
+  pcf8574.write(2,LOW);
+  pcf8574.write(3,LOW);
+  pcf8574.write(4,LOW);
+  pcf8574.write(5,LOW);
+  pcf8574.write(6,LOW);
+  pcf8574.write(7,LOW);
 }
 
 void secondElapsed() {
